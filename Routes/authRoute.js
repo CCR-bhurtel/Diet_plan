@@ -40,6 +40,7 @@ router.post(
     const user = await User.findOne({ email }).select('+password');
 
     if (!user || !(await user.correctPassword(password, user.password))) {
+      console.log('Error comes');
       return next(new AppError('Incorrect Email or Password', 401));
     }
     createSendToken(user, res, 200);

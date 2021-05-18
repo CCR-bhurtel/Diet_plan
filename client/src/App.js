@@ -1,20 +1,36 @@
-import React from 'react';
+import React, { Fragment, useEffect } from 'react';
 import { BrowserRouter, Route } from 'react-router-dom';
-import Home from './components/Home';
-import Login from './components/Login';
-import Signup from './components/Signup';
+import Home from './components/home/Home';
+import Signup from './components/Auth/Signup';
+import { Provider } from 'react-redux';
+import store from './store';
+import Navbar from './components/navbar/Navbar';
+import Login from './components/Auth/Login';
+import Alert from './components/alert/Alert';
+import setAuthToken from './Utils/setAuthToken';
+import { loaduser } from './actions/authAction';
+import About from './components/about/About';
+
+if (localStorage.token) setAuthToken(localStorage.token);
 
 function App() {
+  useEffect(() => {
+    store.dispatch(loaduser());
+  });
   return (
-    <div>
-      <h1>Hello world</h1>
-
+    <Provider store={store}>
       <BrowserRouter>
-        <Route exact path="/" component={Home} />
-        <Route exact path="/" component={Login} />
-        <Route exact path="/" component={Signup} />
+        <Fragment>
+          <Navbar />
+          <Alert />
+          <Route exact path="/" component={Home} />
+          <Route exact path="/about" component={About} />
+          <Route exact path="/login" component={Login} />
+
+          <Route exact path="/signup" component={Signup} />
+        </Fragment>
       </BrowserRouter>
-    </div>
+    </Provider>
   );
 }
 

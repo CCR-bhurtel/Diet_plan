@@ -11,3 +11,9 @@ export const LOGIN_FAIL = 'LOGIN_FAILED';
 export const LOG_OUT = 'LOG_OUT';
 
 export const DELETE_ACCOUNT = 'DELETE_ACCOUNT';
+export const CLEAR_PROFILE = 'CLEAR_PROFILE';
+
+export const SET_NUTRITION = 'SET_NUTRITION';
+export const SET_TRAINING = 'SET_TRAINING';
+
+export const SET_SETTING = 'SET_SETTING';

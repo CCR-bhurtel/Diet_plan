@@ -1,0 +1,160 @@
+@forward '../../../styles/config/config';
+@use '../../../styles/config/config' as *;
+
+.meal {
+  @include flexSetup(column, flex-start, center);
+  position: relative;
+  width: 100%;
+  margin-bottom: 20px;
+  border-radius: 30px;
+  transition: 0.2s linear;
+  background: $white-color;
+  box-shadow: 1px 1px 5px $gray-color;
+
+  &__paragraph {
+    padding: 0px 20px 20px;
+    line-height: 1.8;
+  }
+  
+  &__copyright {
+    padding: 20px;
+    color: $gray-color;
+  }
+
+  &__top-section {
+    @include flexSetup(row, center, space-between);
+    width: 100%;
+    padding: 20px;
+    cursor: pointer;
+
+    &__meal-title {
+      @include flexSetup(row, center, flex-start);
+      color: $purple-color;
+      @extend %robotoBold;
+      font-size: 1.5rem;
+      width: 30%;
+    }
+
+    &__meal-stats-list {
+      @include flexSetup(row, center, flex-end);
+      list-style-type: none;
+      width: 70%;
+
+      &__item {
+        margin-left: 15px;
+        font-size: 1.5rem;
+        @extend %robotoNormal;
+
+        &--kcal {
+          margin-left: 30px;
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $purple-color;
+        }
+      }
+    }
+  }
+
+  &__products-section {
+    @include flexSetup(column, flex-start, flex-start);
+    width: calc(100% - 40px);
+    border-top: 2px solid $gray-color;
+    border-bottom: 2px solid $gray-color;
+    margin: 0 20px;
+    padding: 10px 0;
+
+    &--settings {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+
+    &__product {
+      width: 100%;
+      @include flexSetup(row, flex-start, space-between);
+      margin-bottom: 10px;
+
+      &__info {
+        @include flexSetup(column, flex-start, flex-start);
+      }
+      
+      &__title {
+        @extend %robotoBold;
+        font-size: 1.1rem;
+        color: $gray-color;
+        margin-bottom: 2px;
+      }
+
+      &__weight {
+        font-family: 0.9rem;
+        color: $gray-color;
+        font-size: 0.9rem;
+      }
+  
+      &__stats-list {
+        @include flexSetup(row, flex-end, flex-start);
+        list-style-type: none;
+  
+        &__item {
+          margin-left: 15px;
+          @extend %robotoNormal;
+          font-size: 1.2rem;
+          color: $black-color;
+          text-align: right;
+        
+          &--kcal {
+            @extend %robotoBold;
+            margin-left: 25px;
+            font-weight: 700;
+            color: $black-color;
+          }
+        }
+      }
+      
+      &:last-of-type {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &__buttons-section {
+    @include flexSetup(row, center, flex-end);
+    width: calc(100% - 40px);
+    margin: 20px;
+
+    &--settings {
+      border-top: 2px solid $gray-color;
+      width: 100%;
+      padding: 20px 0;
+      margin: 0;
+    }
+
+    &__remove-button, &__remove-button--disabled {
+      cursor: pointer;
+      background: $white-color;
+      color: $purple-color;
+      padding: 8px 12px;
+      border-radius: 15px;
+      @extend %robotoNormal;
+      font-size: 1.2rem;
+      box-shadow: 0 0 3px $gray-color;
+      
+      &--disabled {
+        cursor: default;
+        opacity: 0.4;
+        box-shadow: 0 0 2px $black-color;
+      }
+    }
+
+    &__add-button {
+      cursor: pointer;
+      background: $purple-color;
+      color: $white-color;
+      margin-left: 10px;
+      padding: 8px 20px;
+      @extend %robotoNormal;
+      font-size: 1.2rem;
+      border-radius: 15px;
+      box-shadow: 0 0 3px $gray-color;
+    }
+  }
+}

@@ -33,7 +33,9 @@ export default function MoreWindow(props) {
       <main className="window__main">
         <section className="window__main__section">
           <h3 className="window__main__section__title">Description</h3>
-          <p className="window__main__section__text">{props.description}</p>
+          <p style={{ color: 'white' }} className="window__main__section__text">
+            {props.description}
+          </p>
         </section>
 
         <section className="window__main__section window__main__section--halfed">
@@ -59,7 +61,10 @@ export default function MoreWindow(props) {
                 }
               ></span>
             </div>
-            <p className="window__main__section__text">
+            <p
+              style={{ color: 'white' }}
+              className="window__main__section__text"
+            >
               {props.typeOfExercise}
             </p>
           </aside>
@@ -68,7 +73,11 @@ export default function MoreWindow(props) {
             <ul className="window__main__section__list">
               {props.muscles.map((muscle, index) => {
                 return (
-                  <li key={index} className="window__main__section__list__item">
+                  <li
+                    key={index}
+                    style={{ color: 'white' }}
+                    className="window__main__section__list__item"
+                  >
                     {muscle}
                   </li>
                 );

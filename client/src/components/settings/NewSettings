@@ -3,7 +3,23 @@ import { exercises } from '../../exercisesList';
 import '../../components/product_removing_window/styles/productRemovingWindow.css';
 import '../../components/product_adding_window/styles/productAddingWindow.css';
 import { connect } from 'react-redux';
-import { changePageTitle } from '../../actions/homeActions';
+
+import {
+  handleOpening,
+  resetCheckbox,
+  saveSettingsToLocalStorage,
+  restoreSettingFromLocalStorage,
+  confirmClearAllProducts,
+  cancelClearAllProducts,
+  confirmClearAllSeries,
+  cancelClearAllSeries,
+  resetOptionsStates,
+  handleSettingsSaved,
+  handleSettingOnChange,
+  handleSettingsCanceled,
+  handleExerciseChoosing,
+  handleSettingChangedState,
+} from '../../actions/settingsAction';
 
 const initialState = {
   isCategoryOpened: false,
@@ -48,147 +64,27 @@ const ACTIONS = {
   SET_SETTINGS_CHANGED_STATE: 'set-settings-changed-state',
   RESET_NUTRITION_SETTINGS_TO_INITIAL: 'reset-nutrition-settings-to-initial',
   RESET_TRAINING_SETTINGS_TO_INITIAL: 'reset-training-settings-to-initial',
-  UPDATE_TRAINING_LIST: 'update-training-list',
 };
 
-function Settings(props) {
-  const reducer = (state, action) => {
-    switch (action.type) {
-      case ACTIONS.NEGATE_CATEGORY_OPENED: {
-        return { ...state, isCategoryOpened: !state.isCategoryOpened };
-      }
+const Settings = (props) => {
+  const settings = props.settings;
 
-      case ACTIONS.UPDATE_TRAINING_LIST:
-        console.log('here it is');
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: { selectedExercises: action.payload },
-          },
-        };
-      case ACTIONS.CHANGE_SETTINGS_DATA: {
-        switch (action.payload.key) {
-          case 'editMealName': {
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  namesOfMeals: {
-                    ...state.settingsData.nutrition.namesOfMeals,
-                    [action.payload.index]: action.payload.value,
-                  },
-                },
-              },
-            };
-          }
+  const {
+    handleOpening,
+    resetCheckbox,
+    saveSettingsToLocalStorage,
+    restoreSettingFromLocalStorage,
+    confirmClearAllProducts,
+    cancelClearAllProducts,
+    confirmClearAllSeries,
+    cancelClearAllSeries,
+    resetOptionsStates,
+    handleSettingsSaved,
+    handleSettingOnChange,
+    handleSettingsCanceled,
+    handleSettingChangedState,
+  } = props;
 
-          case 'setMealsNumber': {
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  numberOfMeals: action.payload.value,
-                },
-              },
-            };
-          }
-
-          default:
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  dailyDemand: {
-                    ...state.settingsData.nutrition.dailyDemand,
-                    [action.payload.key]: action.payload.value,
-                  },
-                },
-              },
-            };
-        }
-      }
-
-      case ACTIONS.LOAD_SETTINGS: {
-        let newSettings = JSON.parse(localStorage.getItem('settings'));
-        return { ...state, settingsData: newSettings };
-      }
-
-      case ACTIONS.SET_CLEAR_ALL_PRODUCTS: {
-        return { ...state, clearAllProducts: action.payload };
-      }
-
-      case ACTIONS.SET_CLEAR_ALL_SERIES: {
-        return { ...state, clearAllSeries: action.payload };
-      }
-
-      case ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES: {
-        const updatedSelectedExercises =
-          state.settingsData.training.selectedExercises;
-        updatedSelectedExercises.push(action.payload);
-
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: {
-              ...state.settingsData.training,
-              selectedExercises: updatedSelectedExercises,
-            },
-          },
-        };
-      }
-
-      case ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES: {
-        const updatedSelectedExercises =
-          state.settingsData.training.selectedExercises;
-        const indexOfExerciseToRemoving = updatedSelectedExercises.indexOf(
-          action.payload
-        );
-        updatedSelectedExercises.splice(indexOfExerciseToRemoving, 1);
-
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: {
-              ...state.settingsData.training,
-              selectedExercises: updatedSelectedExercises,
-            },
-          },
-        };
-      }
-
-      case ACTIONS.SET_SETTINGS_CHANGED_STATE: {
-        return { ...state, isSettingsChanged: action.payload };
-      }
-
-      case ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL: {
-        return {
-          ...state,
-          settingsData: { ...state.settingsData, nutrition: props.initialData },
-        };
-      }
-
-      case ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL: {
-        console.log(state.settingsData.training.selectedExercises);
-        return {
-          ...state,
-          settingsData: { ...state.settingsData, training: props.initialData },
-        };
-      }
-
-      default:
-        return console.error(`Unknown action type: ${action.type}`);
-    }
-  };
-  const [state, dispatch] = useReducer(reducer, initialState);
   const initialOptionsStates = {
     'clear-all-products': false,
     'reset-nutrition-to-initial': false,
@@ -199,205 +95,57 @@ function Settings(props) {
   const [optionsStates, setOptionsStates] = useState(initialOptionsStates);
 
   // EFFECT WHICH CHECKS IS SETTINGS ARE SAVED IN LOCAL STORAGE
-  useEffect(() => {
-    if (Object.keys(localStorage).length !== 0)
-      dispatch({ type: ACTIONS.LOAD_SETTINGS });
-    else saveSettingsToLocalStorage();
-  }, []);
+  // useEffect(() => {
+  //   if (Object.keys(localStorage).length > 0) {
+  //     restoreSettingFromLocalStorage();
+  //   } else {
+  //     saveSettingsToLocalStorage(settings);
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    const uniqueList = [];
-    state.settingsData.training.selectedExercises.forEach((id) => {
-      if (id == 3 || id == 4 || !uniqueList.includes(id)) {
-        uniqueList.push(id);
-      }
-    });
-    console.log(uniqueList);
+  // // EFFECT WHICH ENABLE POINTER EVENTS AFTER OPENING CONFIRM WINDOW
+  // useEffect(() => {
+  //   if (settings.clearAllProducts || settings.clearAllSeries) {
+  //     const confirmWindow = document.querySelector('.removing-window__confirm');
+  //     confirmWindow.style.pointerEvents = 'auto';
+  //   }
+  // }, [settings.clearAllProducts, settings.clearAllSeries]);
 
-    dispatch({ type: ACTIONS.UPDATE_TRAINING_LIST, payload: uniqueList });
-  }, [state.settingsData.training.selectedExercises.length]);
+  // // DISABLES POINTER EVENTS WHEN ONE OF FORM WINDOWS IS OPENED
+  // useEffect(() => {
+  //   const changePointerEvents = (value) => {
+  //     const meals = document.querySelectorAll('.meal');
+  //     const wrapper = document.querySelector('.wrapper');
+  //     const center = document.querySelector('.center-section');
 
-  // EFFECT WHICH ENABLE POINTER EVENTS AFTER OPENING CONFIRM WINDOW
-  useEffect(() => {
-    if (state.clearAllProducts || state.clearAllSeries) {
-      const confirmWindow = document.querySelector('.removing-window__confirm');
-      confirmWindow.style.pointerEvents = 'auto';
-    }
-  }, [state.clearAllProducts, state.clearAllSeries]);
+  //     meals.forEach((meal) => {
+  //       let buttons = meal.querySelector('.meal__buttons-section');
+  //       buttons.style.pointerEvents = value;
+  //       wrapper.style.pointerEvents = value;
 
-  // DISABLES POINTER EVENTS WHEN ONE OF FORM WINDOWS IS OPENED
-  useEffect(() => {
-    const changePointerEvents = (value) => {
-      const meals = document.querySelectorAll('.meal');
-      const wrapper = document.querySelector('.wrapper');
-      const center = document.querySelector('.center-section');
+  //       // DISABLING SCROLL AT CENTER SECTION
+  //       value === 'none'
+  //         ? (center.style.overflowY = 'hidden')
+  //         : (center.style.overflowY = 'auto');
+  //     });
+  //   };
 
-      meals.forEach((meal) => {
-        let buttons = meal.querySelector('.meal__buttons-section');
-        buttons.style.pointerEvents = value;
-        wrapper.style.pointerEvents = value;
+  //   settings.clearAllProducts || settings.clearAllSeries
+  //     ? changePointerEvents('none')
+  //     : changePointerEvents('auto');
+  // }, [settings.clearAllProducts, settings.clearAllSeries]);
 
-        // DISABLING SCROLL AT CENTER SECTION
-        value === 'none'
-          ? (center.style.overflowY = 'hidden')
-          : (center.style.overflowY = 'auto');
-      });
-    };
+  // // EFFECT WHICH CHECKS IS SETTINGS ARE CHANGED
+  // useEffect(() => {
+  //   const localStorageSettings = localStorage.getItem('settings');
+  //   const currentSettings = JSON.stringify(settings.settingsData);
+  //   // console.log(localStorageSettings);
+  //   // console.log(state.settingsData);
 
-    state.clearAllProducts || state.clearAllSeries
-      ? changePointerEvents('none')
-      : changePointerEvents('auto');
-  }, [state.clearAllProducts, state.clearAllSeries]);
-
-  // EFFECT WHICH CHECKS IS SETTINGS ARE CHANGED
-  useEffect(() => {
-    const localStorageSettings = localStorage.getItem('settings');
-    const currentSettings = JSON.stringify(state.settingsData);
-
-    if (localStorageSettings === currentSettings)
-      dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
-    else dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: true });
-  }, [state.settingsData]);
-
-  const handleOpening = () => {
-    dispatch({ type: ACTIONS.NEGATE_CATEGORY_OPENED });
-  };
-
-  const resetCheckbox = (idOfCheckbox) => {
-    document.querySelector('#' + idOfCheckbox).checked = false;
-  };
-
-  const resetOptionsStates = () => {
-    Object.keys(optionsStates).forEach((key) => {
-      optionsStates[key] = false;
-    });
-  };
-
-  const saveSettingsToLocalStorage = () => {
-    localStorage.setItem('settings', JSON.stringify(state.settingsData));
-  };
-
-  const restoreSettingFromLocalStorage = () => {
-    dispatch({ type: ACTIONS.LOAD_SETTINGS });
-  };
-
-  const confirmClearAllProducts = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-
-    Object.keys(localStorage).forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (value.mealId >= 0) localStorage.removeItem(key);
-      }
-    });
-    changePageTitle('dashboard');
-  };
-
-  const cancelClearAllProducts = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-  };
-
-  const confirmClearAllSeries = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (value.exerciseId >= 0) localStorage.removeItem(key);
-      }
-    });
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
-  };
-
-  const cancelClearAllSeries = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
-  };
-
-  const handleSettingsSaved = (e) => {
-    e.preventDefault();
-
-    if (optionsStates['clear-all-products'])
-      dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: true });
-    if (optionsStates['reset-nutrition-to-initial'])
-      dispatch({ type: ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL });
-    if (optionsStates['clear-all-series'])
-      dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: true });
-    if (optionsStates['reset-training-to-initial'])
-      dispatch({ type: ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL });
-
-    dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
-    saveSettingsToLocalStorage();
-    resetOptionsStates();
-    props.updateGauges(props.home);
-  };
-
-  const handleSettingsCanceled = (e) => {
-    e.preventDefault();
-    restoreSettingFromLocalStorage();
-    resetOptionsStates();
-    props.updateGauges(props.home);
-  };
-
-  const handleExerciseChoosing = (e) => {
-    if (e.target.style.backgroundColor) {
-      if (e.target.style.backgroundColor === 'transparent')
-        dispatch({
-          type: ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-      else
-        dispatch({
-          type: ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-    } else {
-      if (e.target.children[0].style.backgroundColor === 'transparent')
-        dispatch({
-          type: ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-      else
-        dispatch({
-          type: ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-    }
-  };
-
-  const handleSettingOnChange = (e) => {
-    const isNumber = /[0-9]/;
-    const isZero = /^[0]{1}/;
-
-    e.preventDefault();
-
-    if (e.target.id === 'editMealName') {
-      dispatch({
-        type: ACTIONS.CHANGE_SETTINGS_DATA,
-        payload: {
-          key: e.target.id,
-          index: Number(e.target.attributes['data-key'].value),
-          value: e.target.value,
-        },
-      });
-    }
-
-    if (isNumber.test(e.target.value[e.target.value.length - 1])) {
-      if (isZero.test(e.target.value))
-        dispatch({
-          type: ACTIONS.CHANGE_SETTINGS_DATA,
-          payload: { key: e.target.id, value: 1 },
-        });
-      else
-        dispatch({
-          type: ACTIONS.CHANGE_SETTINGS_DATA,
-          payload: { key: e.target.id, value: e.target.value },
-        });
-    } else
-      dispatch({
-        type: ACTIONS.CHANGE_SETTINGS_DATA,
-        payload: { key: e.target.id, value: '' },
-      });
-
-    props.updateGauges(props.home);
-  };
+  //   if (localStorageSettings === currentSettings)
+  //     handleSettingChangedState(false);
+  //   else handleSettingChangedState(true);
+  // }, [handleSettingChangedState, settings.settingsData]);
 
   const handleCheckboxOnClick = (e) => {
     setOptionsStates((prevOptions) => {
@@ -409,7 +157,7 @@ function Settings(props) {
     <>
       <div
         className="meal"
-        style={state.isCategoryOpened ? { left: '-10px' } : { left: '0px' }}
+        style={settings.isCategoryOpened ? { left: '-10px' } : { left: '0px' }}
       >
         <section className="meal__top-section" onClick={handleOpening}>
           <h2 className="meal__top-section__meal-title">{props.category}</h2>
@@ -418,7 +166,9 @@ function Settings(props) {
         <section
           className="meal__products-section meal__products-section--settings"
           style={
-            state.isCategoryOpened ? { display: 'flex' } : { display: 'none' }
+            settings.isCategoryOpened
+              ? { display: 'flex' }
+              : { display: 'none' }
           }
         >
           {props.category === 'Account' && (
@@ -432,7 +182,7 @@ function Settings(props) {
                 <section
                   className="meal__buttons-section meal__buttons-section--settings"
                   style={
-                    state.isCategoryOpened
+                    settings.isCategoryOpened
                       ? { display: 'flex' }
                       : { display: 'none' }
                   }
@@ -442,7 +192,7 @@ function Settings(props) {
                       className="meal__buttons-section__remove-button"
                       onClick={handleSettingsCanceled}
                       type="button"
-                      disabled={state.isSettingsChanged ? false : true}
+                      disabled={settings.isSettingsChanged ? false : true}
                     >
                       Cancel
                     </button>
@@ -463,7 +213,7 @@ function Settings(props) {
 
           {props.category === 'Nutrition' && (
             <section className="center-section__main__settings">
-              {state.clearAllProducts && (
+              {settings.clearAllProducts && (
                 <section className="removing-window__confirm">
                   <h1 className="removing-window__title">Clear all?</h1>
 
@@ -513,8 +263,12 @@ function Settings(props) {
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="proteins"
-                      value={state.settingsData.nutrition.dailyDemand.proteins}
-                      onChange={handleSettingOnChange}
+                      value={
+                        settings.settingsData.nutrition.dailyDemand.proteins
+                      }
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       placeholder="Proteins"
                       maxLength="4"
                     ></input>
@@ -535,8 +289,10 @@ function Settings(props) {
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="fats"
-                      value={state.settingsData.nutrition.dailyDemand.fats}
-                      onChange={handleSettingOnChange}
+                      value={settings.settingsData.nutrition.dailyDemand.fats}
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       placeholder="Fats"
                       maxLength="4"
                     ></input>
@@ -557,8 +313,10 @@ function Settings(props) {
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="Carbs"
-                      value={state.settingsData.nutrition.dailyDemand.carbs}
-                      onChange={handleSettingOnChange}
+                      value={settings.settingsData.nutrition.dailyDemand.carbs}
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       placeholder="Carbs"
                       maxLength="4"
                     ></input>
@@ -579,8 +337,10 @@ function Settings(props) {
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="kcal"
-                      value={state.settingsData.nutrition.dailyDemand.kcal}
-                      onChange={handleSettingOnChange}
+                      value={settings.settingsData.nutrition.dailyDemand.kcal}
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       placeholder="Calories"
                       maxLength="4"
                     ></input>
@@ -605,8 +365,10 @@ function Settings(props) {
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="setMealsNumber"
-                      value={state.settingsData.nutrition.numberOfMeals}
-                      onChange={handleSettingOnChange}
+                      value={settings.settingsData.nutrition.numberOfMeals}
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       maxLength="1"
                     ></input>
                     <span className="adding-window__main__form__line__decoration">
@@ -615,37 +377,41 @@ function Settings(props) {
                     {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
                   </div>
 
-                  {Object.values(state.settingsData.nutrition.namesOfMeals).map(
-                    (meal, index) => {
-                      if (state.settingsData.nutrition.numberOfMeals > index) {
-                        return (
-                          <div
-                            key={index}
-                            className="adding-window__main__form__line adding-window__main__form__line--normal"
-                          >
-                            <label
-                              className="adding-window__main__form__line__label"
-                              htmlFor="editMealName"
-                            >{`Set meal nr ${index + 1} name: `}</label>
-                            <input
-                              className="adding-window__main__form__line__input"
-                              data-key={index}
-                              type="text"
-                              id="editMealName"
-                              value={
-                                state.settingsData.nutrition.namesOfMeals[index]
-                              }
-                              onChange={handleSettingOnChange}
-                              required
-                            ></input>
-                            {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
-                          </div>
-                        );
-                      } else {
-                        return null;
-                      }
+                  {Object.values(
+                    settings.settingsData.nutrition.namesOfMeals
+                  ).map((meal, index) => {
+                    if (settings.settingsData.nutrition.numberOfMeals > index) {
+                      return (
+                        <div
+                          key={index}
+                          className="adding-window__main__form__line adding-window__main__form__line--normal"
+                        >
+                          <label
+                            className="adding-window__main__form__line__label"
+                            htmlFor="editMealName"
+                          >{`Set meal nr ${index + 1} name: `}</label>
+                          <input
+                            className="adding-window__main__form__line__input"
+                            data-key={index}
+                            type="text"
+                            id="editMealName"
+                            value={
+                              settings.settingsData.nutrition.namesOfMeals[
+                                index
+                              ]
+                            }
+                            onChange={(e) => {
+                              handleSettingOnChange(e, props);
+                            }}
+                            required
+                          ></input>
+                          {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                        </div>
+                      );
+                    } else {
+                      return null;
                     }
-                  )}
+                  })}
                 </section>
 
                 <section className="adding-window__main__form adding-window__main__form--options">
@@ -669,7 +435,7 @@ function Settings(props) {
                         id="clear-all-products"
                         style={
                           optionsStates['clear-all-products']
-                            ? { backgroundColor: '#08c096' }
+                            ? { backgroundColor: '#7500AF' }
                             : { backgroundColor: 'transparent' }
                         }
                       ></div>
@@ -694,7 +460,7 @@ function Settings(props) {
                         id="reset-nutrition-to-initial"
                         style={
                           optionsStates['reset-nutrition-to-initial']
-                            ? { backgroundColor: '#08c096' }
+                            ? { backgroundColor: '#7500AF' }
                             : { backgroundColor: 'transparent' }
                         }
                       ></div>
@@ -705,7 +471,7 @@ function Settings(props) {
                 <section
                   className="meal__buttons-section meal__buttons-section--settings"
                   style={
-                    state.isCategoryOpened
+                    settings.isCategoryOpened
                       ? { display: 'flex' }
                       : { display: 'none' }
                   }
@@ -713,13 +479,13 @@ function Settings(props) {
                   <div>
                     <button
                       className={
-                        state.isSettingsChanged
+                        settings.isSettingsChanged
                           ? 'meal__buttons-section__remove-button'
                           : 'meal__buttons-section__remove-button meal__buttons-section__remove-button--disabled'
                       }
                       onClick={handleSettingsCanceled}
                       type="button"
-                      disabled={state.isSettingsChanged ? false : true}
+                      disabled={settings.isSettingsChanged ? false : true}
                     >
                       Cancel
                     </button>
@@ -740,7 +506,7 @@ function Settings(props) {
 
           {props.category === 'Training' && (
             <section className="center-section__main__settings">
-              {state.clearAllSeries && (
+              {settings.clearAllSeries && (
                 <section className="removing-window__confirm">
                   <h1 className="removing-window__title">Clear all?</h1>
 
@@ -772,7 +538,9 @@ function Settings(props) {
 
               <form
                 className="center-section__main__settings__form"
-                onSubmit={handleSettingsSaved}
+                onSubmit={(e) => {
+                  handleSettingsSaved(e, optionsStates, props);
+                }}
               >
                 <section className="adding-window__main__form adding-window__main__form--exercises">
                   <h3 className="adding-window__main__form__title">
@@ -800,10 +568,10 @@ function Settings(props) {
                             className="adding-window__main__form__background__checked"
                             id={'exercise' + exercise.id}
                             style={
-                              state.settingsData.training.selectedExercises.includes(
+                              settings.settingsData.training.selectedExercises.includes(
                                 exercise.id
                               )
-                                ? { backgroundColor: '#08c096' }
+                                ? { backgroundColor: '#7500AF' }
                                 : { backgroundColor: 'transparent' }
                             }
                           ></div>
@@ -834,7 +602,7 @@ function Settings(props) {
                         id="clear-all-series"
                         style={
                           optionsStates['clear-all-series']
-                            ? { backgroundColor: '#08c096' }
+                            ? { backgroundColor: '#7500AF' }
                             : { backgroundColor: 'transparent' }
                         }
                       ></div>
@@ -859,7 +627,7 @@ function Settings(props) {
                         id="reset-training-to-initial"
                         style={
                           optionsStates['reset-training-to-initial']
-                            ? { backgroundColor: '#08c096' }
+                            ? { backgroundColor: '#7500AF' }
                             : { backgroundColor: 'transparent' }
                         }
                       ></div>
@@ -870,7 +638,7 @@ function Settings(props) {
                 <section
                   className="meal__buttons-section meal__buttons-section--settings"
                   style={
-                    state.isCategoryOpened
+                    settings.isCategoryOpened
                       ? { display: 'flex' }
                       : { display: 'none' }
                   }
@@ -878,13 +646,15 @@ function Settings(props) {
                   <div>
                     <button
                       className={
-                        state.isSettingsChanged
+                        settings.isSettingsChanged
                           ? 'meal__buttons-section__remove-button'
                           : 'meal__buttons-section__remove-button meal__buttons-section__remove-button--disabled'
                       }
-                      onClick={handleSettingsCanceled}
+                      onClick={(e) => {
+                        handleSettingsCanceled(e, props);
+                      }}
                       type="button"
-                      disabled={state.isSettingsChanged ? false : true}
+                      disabled={settings.isSettingsChanged ? false : true}
                     >
                       Cancel
                     </button>
@@ -906,10 +676,26 @@ function Settings(props) {
       </div>
     </>
   );
-}
+};
 
 const mapStateToProps = (state) => ({
   home: state.home,
+  settings: state.settings,
 });
 
-export default connect(mapStateToProps)(Settings);
+export default connect(mapStateToProps, {
+  handleOpening,
+  resetCheckbox,
+  saveSettingsToLocalStorage,
+  restoreSettingFromLocalStorage,
+  confirmClearAllProducts,
+  cancelClearAllProducts,
+  confirmClearAllSeries,
+  cancelClearAllSeries,
+  resetOptionsStates,
+  handleSettingsSaved,
+  handleSettingOnChange,
+  handleSettingsCanceled,
+  handleExerciseChoosing,
+  handleSettingChangedState,
+})(Settings);

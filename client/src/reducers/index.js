@@ -1,6 +1,18 @@
 import { combineReducers } from 'redux';
 import auth from './auth';
 import alert from './alert';
-import center from './center';
+import home from './home';
 
-export default combineReducers({ alert, auth, center });
+import settings from './settings';
+import edit from './edit';
+import add from './add';
+import meal from './meal';
+export default combineReducers({
+  alert,
+  auth,
+  home,
+  settings,
+  edit,
+  add,
+  meal,
+});

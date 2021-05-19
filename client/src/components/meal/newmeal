@@ -1,0 +1,335 @@
+// IMPORTS
+
+import { React, useState, useEffect, useReducer, memo } from 'react';
+import { connect } from 'react-redux';
+import {
+  handleMealOpening,
+  handleAddingToSummary,
+  handleSubstractingFromSummary,
+  handleAddWindow,
+  handleRemoveWindow,
+  handleProductAdding,
+  addNewProduct,
+  handlePredefinedProductsAdding,
+  handleProductRemoving,
+  handleFormClearing,
+  handleOnChange,
+  add_new_list,
+  clear_product_list,
+  addProductToProductList,
+  dispatchThis,
+} from '../../actions/mealActions';
+import AddWindow from '../product_adding_window/ProductAddingWindow';
+import RemoveWindow from '../product_removing_window/ProductRemovingWindow';
+import './styles/meal.css';
+
+export const warnings = {
+  name: 'Name must be a string of letters only',
+  weight: 'Weight must be a positive number',
+  macros: 'Macronutrient must be a number',
+};
+
+const ACTIONS = {
+  ADD_NEW_LISTS: 'add_new_lists',
+  NEGATE_MEAL_STATE: 'negate-meal-state',
+  NEGATE_ADDING_WINDOW_STATE: 'negate-adding-window-state',
+  NEGATE_REMOVING_WINDOW_STATE: 'negate-removing-window-state',
+  ADD_PRODUCT: 'add-product',
+  ENABLE_PLACEHOLDER: 'enable-placeholder',
+  DISABLE_PLACEHOLDER: 'disable-placeholder',
+  SET_WARNING: 'set-warning',
+  CLEAR_WARNING: 'clear-warning',
+  REMOVE_PRODUCT: 'remove-product',
+  ADD_TO_SUMMARY: 'add-to-summary',
+  SUB_FROM_SUMMARY: 'sub-from-summary',
+  CLEAR_PRODUCTLIST_BEFORE_DAY_CHANGING:
+    'clear-productlist-before-day-changing',
+  ADD_PRODUCT_TO_PRODUCTLIST: 'add-product-to-productlist',
+};
+
+// COMPONENTS
+
+const Meal = (props) => {
+  const {
+    handleMealOpening,
+    handleAddingToSummary,
+    handleSubstractingFromSummary,
+    handleAddWindow,
+    handleRemoveWindow,
+    handleProductAdding,
+    addNewProduct,
+    handlePredefinedProductsAdding,
+    handleProductRemoving,
+    handleFormClearing,
+    handleOnChange,
+    add_new_list,
+    clear_product_list,
+    addProductToProductList,
+    dispatchThis,
+  } = props;
+  // REDUCER STUFF
+  let state = props.meal;
+
+  const [isPlaceholderEnabled, setPlaceholderState] = useState(false);
+
+  // LOADS DATA FROM LOCAL STORAGE AFTER DAY CHANGE
+  useEffect(() => {
+    let localStorageKeys = Object.keys(localStorage);
+    localStorageKeys.forEach((key) => {
+      if (key != 'token') {
+        let value = JSON.parse(localStorage.getItem(key));
+        if (
+          value.mealId === props.mealId &&
+          value.dateIds.dayId === props.dateIds.dayId &&
+          value.dateIds.monthId === props.dateIds.monthId &&
+          value.dateIds.yearId === props.dateIds.yearId
+        )
+          addProductToProductList(value);
+      }
+    });
+  }, [props.dateIds]);
+
+  // CLEARS PRODUCTLIST AFTER DAY CHANGE
+  useEffect(() => {
+    return () => clear_product_list();
+  }, [props.dateIds]);
+
+  useEffect(() => {
+    const uniqueListIds = [];
+    const uniqueList = [];
+    state.productList.map((product) => {
+      if (!uniqueListIds.includes(product.id)) {
+        uniqueListIds.push(product.id);
+        uniqueList.push(product);
+      }
+      add_new_list(uniqueList);
+    });
+  }, [state.productList.length]);
+  // CLOSES WINDOWS AFTER DAY CHANGE
+  useEffect(() => {
+    const disableVisibilityIfEnabled = (state, action) => {
+      if (state) dispatchThis(action);
+    };
+
+    disableVisibilityIfEnabled(state.isMealOpened, ACTIONS.NEGATE_MEAL_STATE);
+    disableVisibilityIfEnabled(
+      state.isAddingWindowOpened,
+      ACTIONS.NEGATE_ADDING_WINDOW_STATE
+    );
+    disableVisibilityIfEnabled(
+      state.isRemovingWindowOpened,
+      ACTIONS.NEGATE_REMOVING_WINDOW_STATE
+    );
+  }, [props.dateIds]);
+
+  // SENDS DATA FROM MEAL TO GAUGES
+  useEffect(() => {
+    props.updateGauges(state.summary, props.mealId, props.home);
+  }, [state.summary]);
+
+  useEffect(() => {
+    addNewProduct(props);
+  }, []);
+
+  // DISABLES POINTER EVENTS WHEN ONE OF FORM WINDOWS IS OPENED
+  useEffect(() => {
+    const changePointerEvents = (value) => {
+      const meals = document.querySelectorAll('.meal');
+      const wrapper = document.querySelector('.wrapper');
+      const center = document.querySelector('.center-section');
+
+      meals.forEach((meal) => {
+        let buttons = meal.querySelector('.meal__buttons-section');
+        buttons.style.pointerEvents = value;
+        wrapper.style.pointerEvents = value;
+
+        // DISABLING SCROLL AT CENTER SECTION
+        value === 'none'
+          ? (center.style.overflowY = 'hidden')
+          : (center.style.overflowY = 'auto');
+      });
+    };
+
+    state.isAddingWindowOpened || state.isRemovingWindowOpened
+      ? changePointerEvents('none')
+      : changePointerEvents('auto');
+  }, [state.isAddingWindowOpened, state.isRemovingWindowOpened]);
+
+  return (
+    <div
+      className="meal"
+      style={state.isMealOpened ? { left: '-10px' } : { left: '0px' }}
+    >
+      <section className="meal__top-section" onClick={handleMealOpening}>
+        <h2 className="meal__top-section__meal-title">{props.name}</h2>
+
+        <ul className="meal__top-section__meal-stats-list">
+          <li className="meal__top-section__meal-stats-list__item">
+            {state.summary.proteins} g
+          </li>
+          <li className="meal__top-section__meal-stats-list__item">
+            {state.summary.fats} g
+          </li>
+          <li className="meal__top-section__meal-stats-list__item">
+            {state.summary.carbs} g
+          </li>
+          <li className="meal__top-section__meal-stats-list__item">
+            {state.summary.kcal} kcal
+          </li>
+        </ul>
+      </section>
+
+      {state.productList.length !== 0 ? (
+        <section
+          className="meal__products-section"
+          style={state.isMealOpened ? { display: 'flex' } : { display: 'none' }}
+        >
+          {state.productList.map((product) => {
+            return (
+              <Product
+                key={product.id}
+                name={product.name}
+                weight={product.weight}
+                proteins={product.proteins}
+                fats={product.fats}
+                carbs={product.carbs}
+                kcal={product.kcal}
+                addIngredientsFunction={handleAddingToSummary}
+                subIngredientsFunction={handleSubstractingFromSummary}
+              ></Product>
+            );
+          })}
+        </section>
+      ) : null}
+
+      <section
+        className="meal__buttons-section"
+        style={state.isMealOpened ? { display: 'flex' } : { display: 'none' }}
+      >
+        <div>
+          <button
+            className={
+              state.productList.length
+                ? 'meal__buttons-section__remove-button'
+                : 'meal__buttons-section__remove-button--disabled'
+            }
+            onClick={state.productList.length ? handleRemoveWindow : null}
+            disabled={
+              state.isAddingWindowOpened || state.isRemovingWindowOpened
+                ? true
+                : false
+            }
+          >
+            Remove
+          </button>
+
+          <button
+            className="meal__buttons-section__add-button"
+            onClick={handleAddWindow}
+            disabled={
+              state.isAddingWindowOpened || state.isRemovingWindowOpened
+                ? true
+                : false
+            }
+          >
+            Add
+          </button>
+        </div>
+      </section>
+
+      {state.isAddingWindowOpened ? (
+        <AddWindow
+          data={{
+            isPlaceholderEnabled: isPlaceholderEnabled,
+            name: state.newProduct.name,
+            weight: state.newProduct.weight,
+            proteins: state.newProduct.proteins,
+            fats: state.newProduct.fats,
+            carbs: state.newProduct.carbs,
+            kcal: state.newProduct.kcal,
+          }}
+          warning={state.warning}
+          handleOnChange={handleOnChange}
+          setPlaceholderState={setPlaceholderState}
+          handleFormClearing={handleFormClearing}
+          mealProps={props}
+          handleProductAdding={handleProductAdding}
+          handleAddWindow={handleAddWindow}
+          handlePredefinedProductsAdding={handlePredefinedProductsAdding}
+        />
+      ) : null}
+
+      {state.isRemovingWindowOpened ? (
+        <RemoveWindow
+          list={state.productList}
+          handleRemoving={handleProductRemoving}
+          handleRemoveWindow={handleRemoveWindow}
+        />
+      ) : null}
+    </div>
+  );
+};
+const mapStateToProps = (state) => ({
+  home: state.home,
+  meal: state.meal,
+});
+
+export default connect(mapStateToProps, {
+  handleMealOpening,
+  handleAddingToSummary,
+  handleSubstractingFromSummary,
+  handleAddWindow,
+  handleRemoveWindow,
+  handleProductAdding,
+  addNewProduct,
+  handlePredefinedProductsAdding,
+  handleProductRemoving,
+  handleFormClearing,
+  handleOnChange,
+  add_new_list,
+  clear_product_list,
+  addProductToProductList,
+  dispatchThis,
+})(Meal);
+
+function Product(props) {
+  useEffect(() => {
+    let ingredients = {
+      proteins: props.proteins,
+      fats: props.fats,
+      carbs: props.carbs,
+      kcal: props.kcal,
+    };
+    props.addIngredientsFunction(ingredients);
+
+    return () => {
+      props.subIngredientsFunction(ingredients);
+    };
+  }, []);
+
+  return (
+    <div className="meal__products-section__product">
+      <div className="meal__products-section__product__info">
+        <h2 className="meal__products-section__product__title">{props.name}</h2>
+        <p className="meal__products-section__product__weight">
+          {props.weight} g
+        </p>
+      </div>
+
+      <ul className="meal__products-section__product__stats-list">
+        <li className="meal__products-section__product__stats-list__item">
+          {props.proteins} g
+        </li>
+        <li className="meal__products-section__product__stats-list__item">
+          {props.fats} g
+        </li>
+        <li className="meal__products-section__product__stats-list__item">
+          {props.carbs} g
+        </li>
+        <li className="meal__products-section__product__stats-list__item meal__products-section__product__stats-list__item--kcal">
+          {props.kcal} kcal
+        </li>
+      </ul>
+    </div>
+  );
+}

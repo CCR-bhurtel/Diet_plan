@@ -13,7 +13,15 @@ export const LOG_OUT = 'LOG_OUT';
 export const DELETE_ACCOUNT = 'DELETE_ACCOUNT';
 export const CLEAR_PROFILE = 'CLEAR_PROFILE';
 
-export const SET_NUTRITION = 'SET_NUTRITION';
-export const SET_TRAINING = 'SET_TRAINING';
 
-export const SET_SETTING = 'SET_SETTING';
+
+export const UPDATE_MEALS_INGREDIENTS_SUMMARY =
+  'update-meals-ingredients-summary';
+export const UPDATE_DAILY_INGREDIENTS_SUMMARY =
+  'update-daily-ingredients-summary';
+export const COUNT_GAUGES_DATA = 'count-gauges-data';
+export const CHANGE_DATE = 'change-date';
+export const CHANGE_PAGE_TITLE = 'change-page-title';
+export const LOAD_SETTINGS = 'load-settings';
+
+export const SET_USER_STATUS = 'set-user-status';

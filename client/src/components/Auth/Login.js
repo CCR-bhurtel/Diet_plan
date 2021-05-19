@@ -48,7 +48,6 @@ const Login = ({ login, isAuthenticated }) => {
               minLength="6"
               value={password}
               onChange={(e) => onChange(e)}
-              autoComplete={true}
               required
             />
           </div>

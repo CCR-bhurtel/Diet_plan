@@ -79,6 +79,7 @@ const AddingForm = (props) => {
     const checkedOptions = searchForCheckedOptions(keys);
 
     checkedOptions.forEach((checkedKey) => {
+      // eslint-disable-next-line default-case
       switch (checkedKey) {
         case 'list-saving': {
           const newProduct = {

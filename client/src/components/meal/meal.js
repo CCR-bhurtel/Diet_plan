@@ -1,6 +1,7 @@
 // IMPORTS
 
-import { React, useState, useEffect, useReducer } from 'react';
+import { React, useState, useEffect, useReducer, memo } from 'react';
+import { connect } from 'react-redux';
 import AddWindow from '../product_adding_window/ProductAddingWindow';
 import RemoveWindow from '../product_removing_window/ProductRemovingWindow';
 import './styles/meal.css';
@@ -12,6 +13,7 @@ export const warnings = {
 };
 
 const ACTIONS = {
+  ADD_NEW_LISTS: 'add_new_lists',
   NEGATE_MEAL_STATE: 'negate-meal-state',
   NEGATE_ADDING_WINDOW_STATE: 'negate-adding-window-state',
   NEGATE_REMOVING_WINDOW_STATE: 'negate-removing-window-state',
@@ -30,7 +32,7 @@ const ACTIONS = {
 
 // COMPONENTS
 
-export default function Meal(props) {
+const Meal = (props) => {
   // REDUCER STUFF
   const initialState = {
     isMealOpened: false,
@@ -60,6 +62,8 @@ export default function Meal(props) {
 
   const reducer = (state, action) => {
     switch (action.type) {
+      case ACTIONS.ADD_NEW_LISTS:
+        return { ...state, productList: action.payload };
       case ACTIONS.NEGATE_MEAL_STATE:
         return { ...state, isMealOpened: !state.isMealOpened };
 
@@ -113,7 +117,7 @@ export default function Meal(props) {
 
       // eslint-disable-next-line no-fallthrough
       case ACTIONS.ADD_PRODUCT: {
-        state.newProduct.id = Date.now();
+        state.newProduct.id = Date.now() * Math.random() * 10;
         state.newProduct.dateIds = props.dateIds;
         state.productList.push(state.newProduct);
         localStorage.setItem(
@@ -289,6 +293,19 @@ export default function Meal(props) {
       dispatch({ type: ACTIONS.CLEAR_PRODUCTLIST_BEFORE_DAY_CHANGING });
   }, [props.dateIds]);
 
+  useEffect(() => {
+    const uniqueListIds = [];
+    const uniqueList = [];
+    state.productList.map((product) => {
+      if (!uniqueListIds.includes(product.id)) {
+        uniqueListIds.push(product.id);
+        uniqueList.push(product);
+      } else {
+        localStorage.removeItem(product.id);
+      }
+      dispatch({ type: ACTIONS.ADD_NEW_LISTS, payload: uniqueList });
+    });
+  }, [state.productList.length]);
   // CLOSES WINDOWS AFTER DAY CHANGE
   useEffect(() => {
     const disableVisibilityIfEnabled = (state, action) => {
@@ -308,8 +325,8 @@ export default function Meal(props) {
 
   // SENDS DATA FROM MEAL TO GAUGES
   useEffect(() => {
-    props.updateGauges(state.summary, props.mealId);
-  }, [state.summary]);
+    props.updateGauges(state.summary, props.mealId, props.home);
+  }, [state.summary, props.home.dateIds]);
 
   // DISABLES POINTER EVENTS WHEN ONE OF FORM WINDOWS IS OPENED
   useEffect(() => {
@@ -434,7 +451,6 @@ export default function Meal(props) {
     const isNumber = /[0-9]/;
     const isWord = /[a-z\s]/i;
     const isZero = /^[0]{1}/;
-    console.log(state.productList);
 
     const setValueAsZero = () => {
       dispatch({
@@ -586,7 +602,12 @@ export default function Meal(props) {
       ) : null}
     </div>
   );
-}
+};
+const mapStateToProps = (state) => ({
+  home: state.home,
+});
+
+export default connect(mapStateToProps)(memo(Meal));
 
 function Product(props) {
   useEffect(() => {

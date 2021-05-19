@@ -74,7 +74,7 @@
 .removing-window__confirm__confirm {
   width: 300px;
   position: absolute;
-  top: 5%;
+  top: 70%;
   z-index: 6;
 }
 .removing-window__confirm__subtitle,

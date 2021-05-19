@@ -1,12 +1,13 @@
 // IMPORTS
 
-import { React, useEffect, useReducer } from 'react';
+import { memo, React, useEffect, useReducer } from 'react';
 import './style/exercise.css';
 import './../meal/styles/meal.css';
 import '../product_adding_window/styles/productAddingWindow.css';
 import AddWindow from '../product_adding_window/ProductAddingWindow';
 import RemoveWindow from '../product_removing_window/ProductRemovingWindow';
 import MoreWindow from '../MoreWindow/MoreWindow';
+import { connect } from 'react-redux';
 
 const ACTIONS = {
   NEGATE_EXERCISE_OPENED: 'negate-exercise-opened',
@@ -22,6 +23,7 @@ const ACTIONS = {
   REMOVE_SERIE: 'remove-serie',
   ADD_SERIE_TO_SERIESLIST: 'add-serie-to-serieslist',
   CLEAR_SERIESLIST_BEFORE_DAY_CHANGING: 'clear-serieslist-before-day-change',
+  ADD_NEW_SERIE_LISTS: 'add_new_serie_list',
 };
 
 export const warnings = {
@@ -31,7 +33,8 @@ export const warnings = {
 
 // COMPONENT
 
-export default function Exercise(props) {
+function Exercise(props) {
+  const { home } = props;
   const initialState = {
     isExerciseOpened: false,
     isAddWindowOpened: false,
@@ -122,6 +125,8 @@ export default function Exercise(props) {
 
   const reducer = (state, action) => {
     switch (action.type) {
+      case ACTIONS.ADD_NEW_SERIE_LISTS:
+        return { ...state, seriesList: action.payload };
       case ACTIONS.NEGATE_EXERCISE_OPENED: {
         return { ...state, isExerciseOpened: !state.isExerciseOpened };
       }
@@ -139,6 +144,7 @@ export default function Exercise(props) {
       }
 
       case ACTIONS.CHANGE_NEW_SERIE_DATA: {
+        // eslint-disable-next-line default-case
         switch (action.payload.key) {
           case 'weight':
             return {
@@ -373,8 +379,27 @@ export default function Exercise(props) {
       dispatch({ type: ACTIONS.CLEAR_SERIESLIST_BEFORE_DAY_CHANGING });
   }, [props.dateIds]);
 
+  useEffect(() => {
+    const uniqueListIds = [];
+    const uniqueList = [];
+    state.seriesList.map((serie) => {
+      if (!uniqueListIds.includes(serie.id)) {
+        uniqueListIds.push(serie.id);
+
+        uniqueList.push(serie);
+      } else {
+        serie.serieCount--;
+        localStorage.removeItem(serie.id);
+      }
+      dispatch({ type: ACTIONS.ADD_NEW_SERIE_LISTS, payload: uniqueList });
+    });
+  }, [state.seriesList.length]);
+
   //
-  useEffect(() => {}, [props.dateIds]);
+
+  useEffect(() => {
+    props.updateGauges(home);
+  }, [home.dateIds]);
 
   // CLOSES WINDOWS AFTER DAY CHANGE
   useEffect(() => {
@@ -594,11 +619,11 @@ export default function Exercise(props) {
     return totalReps;
   };
 
-  const countWeightPerRepsRatio = (seriesList) => {
-    return (countTotalWeight(seriesList) / countTotalReps(seriesList)).toFixed(
-      2
-    );
-  };
+  // const countWeightPerRepsRatio = (seriesList) => {
+  //   return (countTotalWeight(seriesList) / countTotalReps(seriesList)).toFixed(
+  //     2
+  //   );
+  // };
 
   const handleSerieAdding = (e) => {
     e.preventDefault();
@@ -784,3 +809,9 @@ export default function Exercise(props) {
     </div>
   );
 }
+
+const mapStateToProps = (state) => ({
+  home: state.home,
+});
+
+export default connect(mapStateToProps)(Exercise);

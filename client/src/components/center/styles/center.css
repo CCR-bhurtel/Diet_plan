@@ -39,7 +39,8 @@
   width: 55%;
   height: 100%;
   position: relative;
-  background: #fff;
+  background: url('../pexels-lumn-1028598.jpg') center no-repeat;
+  background-size: cover;
   border: 2px 0 2px 0 solid white;
   border-radius: 50px 0 0 50px;
   overflow-y: scroll;

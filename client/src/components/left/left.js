@@ -1,14 +1,16 @@
 // IMPORTS
 
 import React from 'react';
+import { connect } from 'react-redux';
+import { handleMenu } from '../../actions/homeActions';
 import './styles/left.css';
 
 // COMPONENTS
 
-export function MenuItem(props) {
+const MenuItem = (props) => {
   const handleClick = (e) => {
     e.preventDefault();
-    props.linkTo(e.target.title);
+    props.handleMenu(e.target.title, props.home);
   };
 
   return (
@@ -27,4 +29,10 @@ export function MenuItem(props) {
       </a>
     </li>
   );
-}
+};
+
+const mapStateToProps = (state) => ({
+  home: state.home,
+});
+
+export default connect(mapStateToProps, { handleMenu })(MenuItem);

@@ -8,7 +8,7 @@ module.exports = authProtect = catchAsync(async (req, res, next) => {
   // Get token from the header
   const token = req.header('x-auth-token');
 
-  console.log(token);
+  console.log('token', token);
 
   //   Check if no token
   if (!token) return next(new AppError('No token, authorization denied', 401));

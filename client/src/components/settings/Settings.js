@@ -4,6 +4,7 @@ import '../../components/product_removing_window/styles/productRemovingWindow.cs
 import '../../components/product_adding_window/styles/productAddingWindow.css';
 import { connect } from 'react-redux';
 import { changePageTitle } from '../../actions/homeActions';
+import axios from 'axios';
 
 const initialState = {
   isCategoryOpened: false,
@@ -59,7 +60,6 @@ function Settings(props) {
       }
 
       case ACTIONS.UPDATE_TRAINING_LIST:
-        console.log('here it is');
         return {
           ...state,
           settingsData: {
@@ -116,8 +116,8 @@ function Settings(props) {
       }
 
       case ACTIONS.LOAD_SETTINGS: {
-        let newSettings = JSON.parse(localStorage.getItem('settings'));
-        return { ...state, settingsData: newSettings };
+        // let newSettings = JSON.parse(localStorage.getItem('settings'));
+        return { ...state, settingsData: action.payload };
       }
 
       case ACTIONS.SET_CLEAR_ALL_PRODUCTS: {
@@ -199,10 +199,13 @@ function Settings(props) {
   const [optionsStates, setOptionsStates] = useState(initialOptionsStates);
 
   // EFFECT WHICH CHECKS IS SETTINGS ARE SAVED IN LOCAL STORAGE
-  useEffect(() => {
-    if (Object.keys(localStorage).length !== 0)
-      dispatch({ type: ACTIONS.LOAD_SETTINGS });
-    else saveSettingsToLocalStorage();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(async () => {
+    const response = await axios.get('/api/setting');
+    console.log(response.data);
+
+    const newSettings = JSON.parse(response.data.setting.setting);
+    dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });
   }, []);
 
   useEffect(() => {
@@ -212,7 +215,6 @@ function Settings(props) {
         uniqueList.push(id);
       }
     });
-    console.log(uniqueList);
 
     dispatch({ type: ACTIONS.UPDATE_TRAINING_LIST, payload: uniqueList });
   }, [state.settingsData.training.selectedExercises.length]);
@@ -249,12 +251,20 @@ function Settings(props) {
       : changePointerEvents('auto');
   }, [state.clearAllProducts, state.clearAllSeries]);
 
-  // EFFECT WHICH CHECKS IS SETTINGS ARE CHANGED
   useEffect(() => {
-    const localStorageSettings = localStorage.getItem('settings');
+    props.updateGauges(props.home);
+  }, [state.settingsData]);
+
+  // EFFECT WHICH CHECKS IS SETTINGS ARE CHANGED
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(async () => {
+    const response = await axios.get('/api/setting');
+
+    const databaseSettings = response.data.setting.setting;
+
     const currentSettings = JSON.stringify(state.settingsData);
 
-    if (localStorageSettings === currentSettings)
+    if (databaseSettings === currentSettings)
       dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
     else dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: true });
   }, [state.settingsData]);
@@ -273,12 +283,19 @@ function Settings(props) {
     });
   };
 
-  const saveSettingsToLocalStorage = () => {
-    localStorage.setItem('settings', JSON.stringify(state.settingsData));
+  const saveSettingsToLocalStorage = async () => {
+    const response = await axios.put('/api/setting', {
+      setting: JSON.stringify(state.settingsData),
+    });
+    console.log(response);
   };
 
-  const restoreSettingFromLocalStorage = () => {
-    dispatch({ type: ACTIONS.LOAD_SETTINGS });
+  const restoreSettingFromLocalStorage = async () => {
+    const response = await axios.get('/api/setting');
+    console.log(response.data);
+
+    const newSettings = JSON.parse(response.data.setting.setting);
+    dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });
   };
 
   const confirmClearAllProducts = () => {
@@ -327,6 +344,7 @@ function Settings(props) {
     saveSettingsToLocalStorage();
     resetOptionsStates();
     props.updateGauges(props.home);
+    props.updateHome(state.settingsData);
   };
 
   const handleSettingsCanceled = (e) => {

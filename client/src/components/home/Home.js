@@ -26,8 +26,8 @@ import {
   updateDateIds,
   changePageTitle,
   handleMenu,
-  saveSettingsToLocalStorage,
   loadSettings,
+  updateHomeSettingData,
 } from '../../actions/homeActions';
 
 function Home({
@@ -39,14 +39,15 @@ function Home({
   updateDateIds,
 
   handleMenu,
-  saveSettingsToLocalStorage,
   loadSettings,
+  updateHomeSettingData,
 }) {
   const MENU_CATEGORIES = ['Nutrition', 'Training', 'Settings'];
 
   useEffect(() => {
-    console.log('Gauge clicked');
-    updateGauges(home);
+    if (home.settingsData) {
+      updateGauges(home);
+    }
   }, [home.dateIds]);
 
   // EFFECT WHICH CHECKS IS SETTINGS ARE SAVED IN LOCAL STORAGE
@@ -55,11 +56,8 @@ function Home({
   }, []);
 
   useEffect(() => {
-    if (Object.keys(localStorage).length > 2) loadSettings(home);
-    else saveSettingsToLocalStorage(home);
-
     updateGauges(home);
-  }, []);
+  }, [home.settingsData]);
 
   const { isAuthenticated, loading, user } = auth;
 
@@ -67,6 +65,8 @@ function Home({
     return <Spinner />;
   } else if (!isAuthenticated) {
     return <Redirect to="/login" />;
+  } else if (home.loadingSetting) {
+    return <Spinner />;
   } else {
     return (
       <div className="home">
@@ -143,12 +143,14 @@ function Home({
                   <Settings
                     category="Nutrition"
                     home
+                    updateHome={updateHomeSettingData}
                     initialData={home.settingsData.nutrition}
                     updateGauges={updateGauges}
                     // pageTitle={home.pageTitle}
                   />
                   <Settings
                     category="Training"
+                    updateHome={updateHomeSettingData}
                     initialData={home.settingsData.training}
                     updateGauges={updateGauges}
                     // pageTitle={home.pageTitle}
@@ -206,6 +208,6 @@ export default connect(mapStateToProps, {
   updateDateIds,
   changePageTitle,
   handleMenu,
-  saveSettingsToLocalStorage,
   loadSettings,
+  updateHomeSettingData,
 })(Home);

@@ -9,6 +9,7 @@ const {
   LOGIN_FAIL,
   LOG_OUT,
   DELETE_ACCOUNT,
+  LOAD_SETTINGS,
 } = require('../actions/types');
 
 const initialState = {
@@ -16,6 +17,7 @@ const initialState = {
   isAuthenticated: null,
   loading: true,
   user: null,
+  setting: null,
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
@@ -34,6 +36,12 @@ export default function (state = initialState, action) {
       return {
         ...state,
         token: payload,
+      };
+
+    case LOAD_SETTINGS:
+      return {
+        ...state,
+        setting: payload,
       };
 
     case LOGIN_SUCCESS:

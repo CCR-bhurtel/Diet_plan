@@ -13,8 +13,6 @@ export const LOG_OUT = 'LOG_OUT';
 export const DELETE_ACCOUNT = 'DELETE_ACCOUNT';
 export const CLEAR_PROFILE = 'CLEAR_PROFILE';
 
-
-
 export const UPDATE_MEALS_INGREDIENTS_SUMMARY =
   'update-meals-ingredients-summary';
 export const UPDATE_DAILY_INGREDIENTS_SUMMARY =

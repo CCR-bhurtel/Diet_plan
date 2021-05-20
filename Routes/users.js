@@ -3,6 +3,7 @@ const User = require('../Model/User');
 const catchAsync = require('../Utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../Utils/appError');
+const Settings = require('../Model/Settings');
 
 const router = express.Router();
 
@@ -15,8 +16,14 @@ const signInToken = (id) => {
   });
 };
 
-const createSendToken = (user, res, statusCode) => {
+const createSendToken = async (user, res, statusCode, newUser) => {
   const token = signInToken(user._id);
+
+  console.log(newUser);
+  if (newUser) {
+    console.log('New user here');
+    const setting = await Settings.create({ userId: user._id });
+  }
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
@@ -44,7 +51,7 @@ router.post(
       return next(new AppError('Please input all fields', 400));
     const user = await User.create(req.body);
 
-    createSendToken(user, res, 201);
+    createSendToken(user, res, 201, true);
   })
 );
 exports.createSendToken = createSendToken;

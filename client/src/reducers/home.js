@@ -22,6 +22,7 @@ const ACTIONS = {
 const initialState = {
   dateIds: { dayId: 0, monthId: 0, yearId: 0 },
   pageTitle: 'Dashboard',
+  loadingSetting: true,
 
   isAddWindowsEnabled: false,
   isRemoveWindowsEnabled: false,
@@ -66,7 +67,7 @@ const initialState = {
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default (state = initialState, action) => {
+export default function (state = initialState, action) {
   switch (action.type) {
     case ACTIONS.UPDATE_MEALS_INGREDIENTS_SUMMARY: {
       const newMealsIngredientsSummary = [...state.mealsIngredientsSummary];
@@ -148,9 +149,11 @@ export default (state = initialState, action) => {
     }
 
     case ACTIONS.LOAD_SETTINGS: {
-      let newSettings = JSON.parse(localStorage.getItem('settings'));
-
-      return { ...state, settingsData: { ...newSettings } };
+      return {
+        ...state,
+        settingsData: { ...action.payload },
+        loadingSetting: false,
+      };
     }
 
     case ACTIONS.SET_USER_STATUS: {
@@ -160,4 +163,4 @@ export default (state = initialState, action) => {
     default:
       return state;
   }
-};
+}

@@ -11,9 +11,10 @@ function Navbar({ auth: { isAuthenticated, loading, user }, logout }) {
           Home
         </a>
       </li>
+
       <li className="nav-item">
-        <a className="nav-link" href="/about">
-          About
+        <a className="nav-link" href="/beginnerPlan">
+          Beginner Plans
         </a>
       </li>
       <li className="nav-item">
@@ -30,9 +31,10 @@ function Navbar({ auth: { isAuthenticated, loading, user }, logout }) {
           Home
         </a>
       </li>
+
       <li className="nav-item">
-        <a className="nav-link" href="/about">
-          About
+        <a className="nav-link" href="/beginnerPlan">
+          Beginner Plans
         </a>
       </li>
       <li className="nav-item">

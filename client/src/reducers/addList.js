@@ -2,8 +2,8 @@ const ACTIONS = {
   SET_PRODUCT_SEND_FOR_EDIT: 'set-product-send-for-edit',
   NEGATE_EDIT_WINDOW_STATE: 'negate-edit-window-state',
   UPDATE_SAVED_PRODUCTS_LIST: 'update-saved-products-list',
-  LOAD_PREDEFINED_PRODUCTS_LIST_FROM_LOCAL_STORAGE:
-    'load-predefined-products-list-from-local-storage',
+  LOAD_PREDEFINED_PRODUCTS_LIST_FROM_DATABASE:
+    'load-predefined-products-list-from-database',
   SET_IS_ADD_BUTTON_DISABLED: 'set-is-add-button-disabled',
 };
 
@@ -72,8 +72,8 @@ const initialState = {
 // eslint-disable-next-line import/no-anonymous-default-export
 export default function (state = initialState, action) {
   switch (action.type) {
-    case ACTIONS.LOAD_PREDEFINED_PRODUCTS_LIST_FROM_LOCAL_STORAGE: {
-      return { ...state, savedProductList: [...action.payload] };
+    case ACTIONS.LOAD_PREDEFINED_PRODUCTS_LIST_FROM_DATABASE: {
+      return { ...state, savedProductList: action.payload };
     }
 
     case ACTIONS.NEGATE_EDIT_WINDOW_STATE: {

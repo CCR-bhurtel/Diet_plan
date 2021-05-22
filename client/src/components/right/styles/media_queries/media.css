@@ -1,16 +1,16 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cookie&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cookie&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap');
 * {
   margin: 0;
   padding: 0;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   -webkit-box-shadow: 0;
-          box-shadow: 0;
+  box-shadow: 0;
   border: none;
-  font-family: "Noto Sans", sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-weight: normal;
   text-decoration: none;
   font-size: 16px;
@@ -20,6 +20,7 @@
   .right-section__gauge-container {
     width: 130px;
     height: 130px;
+    color: #fff !important;
   }
   .right-section__gauge-container:before {
     z-index: 2;
@@ -29,11 +30,13 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 18px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 30px;
@@ -59,9 +62,11 @@
   }
   .right-section__gauge-container__text__percent {
     font-size: 0.7rem;
+    color: #fff;
   }
   .right-section__gauge-container__text__percent--kcal {
     font-size: 0.8rem;
+    color: #fff;
   }
   .right-section__gauge-container__text__left {
     font-size: 0.8rem;
@@ -92,11 +97,13 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 12px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 25px;
@@ -122,12 +129,14 @@
   }
   .right-section__gauge-container__text__percent {
     display: none;
+    color: #fff;
   }
   .right-section__gauge-container__text__percent--kcal {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    color: #fff;
   }
   .right-section__gauge-container__text__left {
     font-size: 0.7rem;

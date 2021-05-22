@@ -4,6 +4,7 @@ const catchAsync = require('../Utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../Utils/appError');
 const Settings = require('../Model/Settings');
+const Predefined = require('../Model/Predefined');
 
 const router = express.Router();
 

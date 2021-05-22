@@ -5,14 +5,15 @@ import home from './home';
 
 import settings from './settings';
 import edit from './edit';
-import add from './add';
-import meal from './meal';
+import addList from './addList';
+import exercise from './exercise';
+
 export default combineReducers({
   alert,
   auth,
   home,
   settings,
   edit,
-  add,
-  meal,
+  addList,
+  exercise,
 });

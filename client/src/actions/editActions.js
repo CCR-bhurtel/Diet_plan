@@ -13,6 +13,11 @@ export const handleResetingForm =
     setIsStateEqualToProps(true);
   };
 
+export const initializeForm = (props) => (dispatch) => {
+  console.log('Initializing form');
+  dispatch({ type: ACTIONS.RESET_FORM, payload: props });
+};
+
 export const calculateNutritionFacts = (e, props) => (dispatch) => {
   const isNumber = /[0-9]/;
   const isZero = /^[0]{1}/;
@@ -107,8 +112,4 @@ export const handleNameChanging = (e) => (dispatch) => {
     });
     dispatch({ type: ACTIONS.SET_WARNING, payload: 'name' });
   }
-};
-
-export const setValueToinitial = (props) => (dispatch) => {
-  dispatch({ type: ACTIONS.RESET_FORM, payload: props });
 };

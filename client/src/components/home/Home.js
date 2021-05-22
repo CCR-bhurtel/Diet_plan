@@ -28,6 +28,7 @@ import {
   handleMenu,
   loadSettings,
   updateHomeSettingData,
+  clearAllProducts,
 } from '../../actions/homeActions';
 
 function Home({
@@ -41,6 +42,7 @@ function Home({
   handleMenu,
   loadSettings,
   updateHomeSettingData,
+  clearAllProducts,
 }) {
   const MENU_CATEGORIES = ['Nutrition', 'Training', 'Settings'];
 
@@ -146,6 +148,8 @@ function Home({
                     updateHome={updateHomeSettingData}
                     initialData={home.settingsData.nutrition}
                     updateGauges={updateGauges}
+                    updateDailySummary={updateDailySummary}
+                    clearAllProducts={clearAllProducts}
                     // pageTitle={home.pageTitle}
                   />
                   <Settings
@@ -153,6 +157,7 @@ function Home({
                     updateHome={updateHomeSettingData}
                     initialData={home.settingsData.training}
                     updateGauges={updateGauges}
+                    updateDailySummary={updateDailySummary}
                     // pageTitle={home.pageTitle}
                   />
                 </>
@@ -210,4 +215,5 @@ export default connect(mapStateToProps, {
   handleMenu,
   loadSettings,
   updateHomeSettingData,
+  clearAllProducts,
 })(Home);

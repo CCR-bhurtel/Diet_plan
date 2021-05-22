@@ -10,10 +10,12 @@ const ACTIONS = {
   SET_SETTINGS_CHANGED_STATE: 'set-settings-changed-state',
   RESET_NUTRITION_SETTINGS_TO_INITIAL: 'reset-nutrition-settings-to-initial',
   RESET_TRAINING_SETTINGS_TO_INITIAL: 'reset-training-settings-to-initial',
+  UPDATE_TRAINING_LIST: 'update-training-list',
 };
 
 const initialState = {
-  isCategoryOpened: false,
+  isCategoryOpenedTraining: false,
+  isCategoryOpenedNutrition: false,
   settingsData: {
     account: {},
 
@@ -46,12 +48,33 @@ const initialState = {
 export default function (state = initialState, action) {
   switch (action.type) {
     case ACTIONS.NEGATE_CATEGORY_OPENED: {
-      return { ...state, isCategoryOpened: !state.isCategoryOpened };
+      // eslint-disable-next-line default-case
+      switch (action.payload) {
+        case 'Training':
+          return {
+            ...state,
+            isCategoryOpenedTraining: !state.isCategoryOpenedTraining,
+          };
+        case 'Nutrition':
+          return {
+            ...state,
+            isCategoryOpenedNutrition: !state.isCategoryOpenedNutrition,
+          };
+        default:
+          return state;
+      }
     }
 
+    case ACTIONS.UPDATE_TRAINING_LIST:
+      return {
+        ...state,
+        settingsData: {
+          ...state.settingsData,
+          training: { selectedExercises: action.payload },
+        },
+      };
     case ACTIONS.CHANGE_SETTINGS_DATA: {
       switch (action.payload.key) {
-        // eslint-disable-next-line no-lone-blocks
         case 'editMealName': {
           return {
             ...state,
@@ -68,7 +91,6 @@ export default function (state = initialState, action) {
           };
         }
 
-        // eslint-disable-next-line no-lone-blocks
         case 'setMealsNumber': {
           return {
             ...state,
@@ -100,8 +122,7 @@ export default function (state = initialState, action) {
     }
 
     case ACTIONS.LOAD_SETTINGS: {
-      let newSettings = JSON.parse(localStorage.getItem('settings'));
-      return { ...state, settingsData: newSettings };
+      return { ...state, settingsData: action.payload };
     }
 
     case ACTIONS.SET_CLEAR_ALL_PRODUCTS: {
@@ -154,17 +175,18 @@ export default function (state = initialState, action) {
     }
 
     case ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL: {
+      const props = action.payload;
       return {
         ...state,
-        settingsData: { ...state.settingsData, nutrition: action.payload },
+        settingsData: { ...state.settingsData, nutrition: props.initialData },
       };
     }
 
     case ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL: {
-      console.log(state.settingsData.training.selectedExercises);
+      const props = action.payload;
       return {
         ...state,
-        settingsData: { ...state.settingsData, training: action },
+        settingsData: { ...state.settingsData, training: props.initialData },
       };
     }
 

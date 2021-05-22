@@ -20,6 +20,7 @@ const createSendToken = async (user, res, statusCode, newUser) => {
   if (newUser) {
     console.log('New user here');
     const setting = await Settings.create({ userId: user._id });
+    const predefined = await Predefined.create({ userId: user._id });
   }
   const token = signInToken(user._id);
   const cookieOptions = {
@@ -47,7 +48,9 @@ router.post(
     const { email, name, password, passwordConfirm } = req.body;
     if (!email || !name || !password || !passwordConfirm)
       return next(new AppError('Please input all fields', 400));
+    console.log(req.body);
     const user = await User.create(req.body);
+    console.log(user);
 
     createSendToken(user, res, 201, true);
   })

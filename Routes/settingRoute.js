@@ -12,9 +12,7 @@ router.get(
   '/',
   authProtect,
   catchAsync(async (req, res, next) => {
-    console.log('request came here');
     const setting = await Settings.findOne({ userId: req.user._id });
-    console.log('setting', setting);
     res.status(200).json({
       setting,
     });

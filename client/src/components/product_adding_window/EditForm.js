@@ -1,118 +1,26 @@
 import { React, useReducer, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import '../styles/window/window.css';
-import { warnings } from '../meal/meal';
+import { connect } from 'react-redux';
 
-const ACTIONS = {
-  UPDATE_PRODUCT_DATA: 'update-product-data',
-  RESET_FORM: 'reset-form',
-  SET_WARNING: 'set-warning',
-  CLEAR_WARNING: 'clear-warning',
-};
+import {
+  handleResetingForm,
+  calculateNutritionFacts,
+  handleNameChanging,
+  initializeForm,
+} from '../../actions/editActions';
 
-export default function EditForm(props) {
+function EditForm(props) {
+  const {
+    handleResetingForm,
+    calculateNutritionFacts,
+    handleNameChanging,
+    initializeForm,
+  } = props;
   const [isFormCompleted, setIsFormCompleted] = useState(false);
   const [isStateEqualToProps, setIsStateEqualToProps] = useState(true);
 
-  const initialState = {
-    productData: {
-      id: props.data.id,
-      name: props.data.name,
-      weight: props.data.weight,
-      proteins: props.data.proteins,
-      fats: props.data.fats,
-      carbs: props.data.carbs,
-      kcal: props.data.kcal,
-    },
-    warning: ['', ''],
-  };
-
-  const reducer = (state, action) => {
-    switch (action.type) {
-      case ACTIONS.UPDATE_PRODUCT_DATA: {
-        switch (action.payload.key) {
-          case 'name': {
-            return {
-              ...state,
-              productData: { ...state.productData, name: action.payload.value },
-            };
-          }
-          case 'weight': {
-            return {
-              ...state,
-              productData: {
-                ...state.productData,
-                weight: action.payload.value,
-              },
-            };
-          }
-          case 'proteins': {
-            return {
-              ...state,
-              productData: {
-                ...state.productData,
-                proteins: action.payload.value,
-              },
-            };
-          }
-          case 'fats': {
-            return {
-              ...state,
-              productData: { ...state.productData, fats: action.payload.value },
-            };
-          }
-          case 'carbs': {
-            return {
-              ...state,
-              productData: {
-                ...state.productData,
-                carbs: action.payload.value,
-              },
-            };
-          }
-          case 'kcal': {
-            return {
-              ...state,
-              productData: { ...state.productData, kcal: action.payload.value },
-            };
-          }
-          default: {
-            return console.error(`Unknown action type: ${action.type}`);
-          }
-        }
-      }
-
-      case ACTIONS.RESET_FORM: {
-        return {
-          ...state,
-          productData: {
-            id: props.data.id,
-            name: props.data.name,
-            weight: props.data.weight,
-            proteins: props.data.proteins,
-            fats: props.data.fats,
-            carbs: props.data.carbs,
-            kcal: props.data.kcal,
-          },
-        };
-      }
-
-      case ACTIONS.SET_WARNING: {
-        if (action.payload === 'name')
-          return { ...state, warning: [warnings.name, action.payload] };
-        else return { ...state, warning: [warnings.weight, action.payload] };
-      }
-
-      case ACTIONS.CLEAR_WARNING: {
-        return { ...state, warning: ['', action.payload] };
-      }
-
-      default:
-        return console.error(`Unknown action type: ${action.type}`);
-    }
-  };
-
-  const [state, dispatch] = useReducer(reducer, initialState);
+  useEffect(() => {});
 
   useEffect(() => {
     const addingWindow = document.querySelector('.window--add');
@@ -125,25 +33,25 @@ export default function EditForm(props) {
     };
   }, []);
 
+  let state = props.edit;
+  let addList = props.addList;
+
   // CHECKING IF FORM IS COMPLETED
   useEffect(() => {
     checkIfFormCompleted();
     checkIfStateIsEqualToProps();
   }, [state.productData]);
 
+  useEffect(() => {
+    console.log('initializing');
+    initializeForm(props);
+  }, []);
   const checkIfFormCompleted = () => {
     const name = document.querySelector('#name').value;
     const weight = document.querySelector('#weight').value;
 
     if (name && weight) setIsFormCompleted(true);
     else setIsFormCompleted(false);
-  };
-
-  const handleResetingForm = (e) => {
-    e.preventDefault();
-    dispatch({ type: ACTIONS.RESET_FORM });
-    dispatch({ type: ACTIONS.CLEAR_WARNING });
-    setIsStateEqualToProps(true);
   };
 
   const checkIfStateIsEqualToProps = () => {
@@ -160,105 +68,9 @@ export default function EditForm(props) {
     props.handleEditingWindow(idOfSelectedProduct);
   };
 
-  const calculateNutritionFacts = (e) => {
-    const isNumber = /[0-9]/;
-    const isZero = /^[0]{1}/;
-
-    const nutritionPerOneGram = {
-      proteins: Number(props.data.proteins) / Number(props.data.weight),
-      fats: Number(props.data.fats) / Number(props.data.weight),
-      carbs: Number(props.data.carbs) / Number(props.data.weight),
-      kcal: Number(props.data.kcal) / Number(props.data.weight),
-    };
-
-    const setValueAsNull = () => {
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'weight', value: '' },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'proteins', value: 0 },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'fats', value: 0 },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'carbs', value: 0 },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'kcal', value: 0 },
-      });
-      dispatch({ type: ACTIONS.SET_WARNING, payload: 'weight' });
-    };
-
-    const setValueAsCorrect = () => {
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'weight', value: Number(e.target.value) },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: {
-          key: 'proteins',
-          value: Math.round(e.target.value * nutritionPerOneGram.proteins),
-        },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: {
-          key: 'fats',
-          value: Math.round(e.target.value * nutritionPerOneGram.fats),
-        },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: {
-          key: 'carbs',
-          value: Math.round(e.target.value * nutritionPerOneGram.carbs),
-        },
-      });
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: {
-          key: 'kcal',
-          value: Math.round(e.target.value * nutritionPerOneGram.kcal),
-        },
-      });
-      dispatch({ type: ACTIONS.CLEAR_WARNING, payload: 'weight' });
-    };
-
-    if (isNumber.test(e.target.value[e.target.value.length - 1])) {
-      isZero.test(e.target.value) ? setValueAsNull() : setValueAsCorrect();
-    } else {
-      setValueAsNull();
-    }
-  };
-
-  const handleNameChanging = (e) => {
-    const isWord = /[a-z\s]/i;
-    e.preventDefault();
-    if (isWord.test(e.target.value[e.target.value.length - 1])) {
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'name', value: e.target.value },
-      });
-      dispatch({ type: ACTIONS.CLEAR_WARNING, payload: 'name' });
-    } else {
-      dispatch({
-        type: ACTIONS.UPDATE_PRODUCT_DATA,
-        payload: { key: 'name', value: '' },
-      });
-      dispatch({ type: ACTIONS.SET_WARNING, payload: 'name' });
-    }
-  };
-
   const handleSavingChanges = (e) => {
     e.preventDefault();
-    props.handleProductEditing(state.productData);
+    props.handleProductEditing(state.productData, addList);
   };
 
   return ReactDOM.createPortal(
@@ -297,7 +109,9 @@ export default function EditForm(props) {
               type="text"
               id="weight"
               value={state.productData.weight}
-              onChange={calculateNutritionFacts}
+              onChange={(e) => {
+                calculateNutritionFacts(e, props);
+              }}
               placeholder={
                 state.warning[1] === 'weight' ? state.warning[0] : null
               }
@@ -364,7 +178,9 @@ export default function EditForm(props) {
           }
           disabled={isStateEqualToProps ? true : false}
           type="button"
-          onClick={handleResetingForm}
+          onClick={(e) => {
+            handleResetingForm(e, setIsStateEqualToProps, props);
+          }}
         >
           Reset
         </button>
@@ -394,3 +210,15 @@ export default function EditForm(props) {
     document.getElementById('portal')
   );
 }
+
+const mapStateToProps = (state) => ({
+  edit: state.edit,
+  addList: state.addList,
+});
+
+export default connect(mapStateToProps, {
+  handleResetingForm,
+  calculateNutritionFacts,
+  handleNameChanging,
+  initializeForm,
+})(EditForm);

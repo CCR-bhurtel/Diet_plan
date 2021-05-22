@@ -1,5 +1,6 @@
 // IMPORTS
 
+import axios from 'axios';
 import { React, useState, useEffect, useReducer, memo } from 'react';
 import { connect } from 'react-redux';
 import AddWindow from '../product_adding_window/ProductAddingWindow';
@@ -63,7 +64,10 @@ const Meal = (props) => {
   const reducer = (state, action) => {
     switch (action.type) {
       case ACTIONS.ADD_NEW_LISTS:
-        return { ...state, productList: action.payload };
+        return {
+          ...state,
+          productList: [...action.payload],
+        };
       case ACTIONS.NEGATE_MEAL_STATE:
         return { ...state, isMealOpened: !state.isMealOpened };
 
@@ -117,13 +121,6 @@ const Meal = (props) => {
 
       // eslint-disable-next-line no-fallthrough
       case ACTIONS.ADD_PRODUCT: {
-        state.newProduct.id = Date.now() * Math.random() * 10;
-        state.newProduct.dateIds = props.dateIds;
-        state.productList.push(state.newProduct);
-        localStorage.setItem(
-          state.newProduct.id,
-          JSON.stringify(state.newProduct)
-        );
         return {
           ...state,
           newProduct: {
@@ -140,6 +137,7 @@ const Meal = (props) => {
         };
       }
 
+      // eslint-disable-next-line no-fallthrough
       case ACTIONS.SET_WARNING: {
         switch (action.payload) {
           case 'name':
@@ -160,10 +158,12 @@ const Meal = (props) => {
         let checkedIdList = action.payload;
 
         checkedIdList.forEach((checkedId) => {
-          newProductList.forEach((product, index) => {
+          newProductList.forEach(async (product, index) => {
             if (Number(product.id) === Number(checkedId)) {
               newProductList.splice(index, 1);
-              localStorage.removeItem(product.id);
+              const response = await axios.put('/api/item', {
+                itemId: product.id,
+              });
             }
           });
         });
@@ -268,22 +268,24 @@ const Meal = (props) => {
   const [isPlaceholderEnabled, setPlaceholderState] = useState(false);
 
   // LOADS DATA FROM LOCAL STORAGE AFTER DAY CHANGE
-  useEffect(() => {
-    let localStorageKeys = Object.keys(localStorage);
-    localStorageKeys.forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (
-          value.mealId === props.mealId &&
-          value.dateIds.dayId === props.dateIds.dayId &&
-          value.dateIds.monthId === props.dateIds.monthId &&
-          value.dateIds.yearId === props.dateIds.yearId
-        )
-          dispatch({
-            type: ACTIONS.ADD_PRODUCT_TO_PRODUCTLIST,
-            payload: value,
-          });
-      }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(async () => {
+    const response = await axios.get('/api/item');
+
+    const items = response.data.items;
+
+    items.forEach((item) => {
+      let value = JSON.parse(item.item);
+      if (
+        value.mealId === props.mealId &&
+        value.dateIds.dayId === props.dateIds.dayId &&
+        value.dateIds.monthId === props.dateIds.monthId &&
+        value.dateIds.yearId === props.dateIds.yearId
+      )
+        dispatch({
+          type: ACTIONS.ADD_PRODUCT_TO_PRODUCTLIST,
+          payload: value,
+        });
     });
   }, [props.dateIds]);
 
@@ -296,12 +298,10 @@ const Meal = (props) => {
   useEffect(() => {
     const uniqueListIds = [];
     const uniqueList = [];
-    state.productList.map((product) => {
+    state.productList.map(async (product) => {
       if (!uniqueListIds.includes(product.id)) {
         uniqueListIds.push(product.id);
         uniqueList.push(product);
-      } else {
-        localStorage.removeItem(product.id);
       }
       dispatch({ type: ACTIONS.ADD_NEW_LISTS, payload: uniqueList });
     });
@@ -388,28 +388,52 @@ const Meal = (props) => {
     dispatch({ type: ACTIONS.NEGATE_REMOVING_WINDOW_STATE });
   };
 
-  const handleProductAdding = (e) => {
+  const handleProductAdding = async (e) => {
     e.preventDefault();
-    setTimeout(() => {
-      dispatch({ type: ACTIONS.ADD_PRODUCT });
-    }, 10);
+
+    state.newProduct.id = Date.now() * Math.random() * 100;
+    state.newProduct.dateIds = props.dateIds;
+    state.productList.push(state.newProduct);
+
+    await axios.post('/api/item', {
+      itemId: state.newProduct.id,
+      item: JSON.stringify(state.newProduct),
+    });
+    dispatch({ type: ACTIONS.ADD_PRODUCT });
+
     dispatch({ type: ACTIONS.NEGATE_ADDING_WINDOW_STATE });
   };
 
   const handlePredefinedProductsAdding = (selectedProducts) => {
-    selectedProducts.forEach((product) => {
+    selectedProducts.forEach(async (product) => {
       // TIMEOUT TO PREVENT DOUBLED IDS
-      setTimeout(() => {
-        Object.keys(product).forEach((key) => {
-          dispatch({
-            type: ACTIONS.CHANGE_NEW_PRODUCT_DATA,
-            payload: { key: key, value: product[key] },
-          });
-        });
 
-        dispatch({ type: ACTIONS.ADD_PRODUCT });
-      }, 10);
+      Object.keys(product).forEach((key) => {
+        dispatch({
+          type: ACTIONS.CHANGE_NEW_PRODUCT_DATA,
+          payload: { key: key, value: product[key] },
+        });
+      });
+
+      let id = Date.now() * Math.random() * 100;
+
+      const newProduct = {
+        ...product,
+        id,
+        dateIds: props.dateIds,
+        mealId: props.mealId,
+      };
+
+      axios.post('/api/item', {
+        itemId: id,
+        item: JSON.stringify(newProduct),
+      });
+      state.productList.push(newProduct);
+
+      dispatch({ type: ACTIONS.ADD_PRODUCT });
     });
+
+    // eslint-disable-next-line no-lone-blocks
 
     dispatch({ type: ACTIONS.NEGATE_ADDING_WINDOW_STATE });
   };

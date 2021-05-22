@@ -1,6 +1,7 @@
 import { React, useState, useEffect, memo } from 'react';
 import './styles/productAddingWindow.css';
 import '../styles/window/window.css';
+import axios from 'axios';
 
 const AddingForm = (props) => {
   const initialOptionsStates = {
@@ -101,10 +102,14 @@ const AddingForm = (props) => {
     props.handleSerieAdding(e);
   };
 
-  const saveNewProductToList = (newProduct) => {
-    const newList = JSON.parse(localStorage.getItem('predefined'));
+  const saveNewProductToList = async (newProduct) => {
+    const response = await axios.get('/api/predefined');
+    console.log(response.data.predefined);
+    const newList = JSON.parse(response.data.predefined);
     newList.push(newProduct);
-    localStorage.setItem('predefined', JSON.stringify(newList));
+    await axios.post('/api/predefined', {
+      predefined: JSON.stringify(newList),
+    });
   };
 
   const handleCheckboxOnClick = (e) => {

@@ -9,7 +9,7 @@ import Login from './components/Auth/Login';
 import Alert from './components/alert/Alert';
 import setAuthToken from './Utils/setAuthToken';
 import { loaduser } from './actions/authAction';
-import About from './components/about/About';
+import BeginnerPlan from './components/beginnerPlans/BeginnerPlan';
 
 if (localStorage.token) setAuthToken(localStorage.token);
 
@@ -24,10 +24,10 @@ function App() {
           <Navbar />
           <Alert />
           <Route exact path="/" component={Home} />
-          <Route exact path="/about" component={About} />
           <Route exact path="/login" component={Login} />
 
           <Route exact path="/signup" component={Signup} />
+          <Route exact path="/beginnerPlan" component={BeginnerPlan} />
         </Fragment>
       </BrowserRouter>
     </Provider>

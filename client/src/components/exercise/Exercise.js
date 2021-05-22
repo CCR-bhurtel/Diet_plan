@@ -8,6 +8,7 @@ import AddWindow from '../product_adding_window/ProductAddingWindow';
 import RemoveWindow from '../product_removing_window/ProductRemovingWindow';
 import MoreWindow from '../MoreWindow/MoreWindow';
 import { connect } from 'react-redux';
+import axios from 'axios';
 
 const ACTIONS = {
   NEGATE_EXERCISE_OPENED: 'negate-exercise-opened',
@@ -161,22 +162,30 @@ function Exercise(props) {
 
       // eslint-disable-next-line no-fallthrough
       case ACTIONS.ADD_SERIE: {
-        const updatedSeriesList = state.seriesList;
-        let serieCount = 1;
+        // const updatedSeriesList = state.seriesList;
+        // let serieCount = 1;
 
-        // ADDING SERIE TO SERIESLIST
-        state.newSerie.id = Date.now();
-        state.newSerie.dateIds = props.dateIds;
-        updatedSeriesList.push(state.newSerie);
+        // // ADDING SERIE TO SERIESLIST
+        // state.newSerie.id = Date.now();
+        // state.newSerie.dateIds = props.dateIds;
+        // updatedSeriesList.push(state.newSerie);
 
-        // SERIE ORDER COUNTING
-        updatedSeriesList.forEach((serie) => {
-          serie.serieCount = serieCount;
-          serieCount++;
-        });
+        // // SERIE ORDER COUNTING
+        // updatedSeriesList.forEach((serie) => {
+        //   serie.serieCount = serieCount;
+        //   serieCount++;
+        // });
 
         // SAVING CHANGES IN LOCAL STORAGE
-        localStorage.setItem(state.newSerie.id, JSON.stringify(state.newSerie));
+        // axios.post('/api/item', {
+        //   itemId: state.newSerie.id,
+        //   item: JSON.stringify(state.newSerie),
+        // });
+
+        // axios.post('/api/item', {
+        //   itemId: state.newSerie.id,
+        //   item: JSON.stringify(state.newSerie),
+        // });
 
         return {
           ...state,
@@ -188,34 +197,16 @@ function Exercise(props) {
             weight: '',
             reps: '',
           },
-          seriesList: updatedSeriesList,
+          seriesList: [...action.payload],
         };
       }
 
       case ACTIONS.REMOVE_SERIE: {
-        let updatedSeriesList = state.seriesList;
-        let checkedIdList = action.payload;
-        let serieCount = 1;
-
-        checkedIdList.forEach((checkedId) => {
-          updatedSeriesList.forEach((serie, index) => {
-            localStorage.removeItem(serie.id);
-            if (Number(serie.id) === Number(checkedId))
-              updatedSeriesList.splice(index, 1);
-          });
-        });
-
-        // SERIE ORDER COUNTING
-        updatedSeriesList.forEach((serie) => {
-          serie.serieCount = serieCount;
-          localStorage.setItem(serie.id, JSON.stringify(serie));
-          serieCount++;
-        });
-
-        return { ...state, seriesList: updatedSeriesList };
+        return { ...state, seriesList: action.payload };
       }
 
       case ACTIONS.SET_WARNING: {
+        // eslint-disable-next-line default-case
         switch (action.payload) {
           case 'weight':
             return { ...state, warning: [warnings.weight, action.payload] };
@@ -224,6 +215,7 @@ function Exercise(props) {
         }
       }
 
+      // eslint-disable-next-line no-fallthrough
       case ACTIONS.CLEAR_WARNING: {
         return { ...state, warning: ['', action.payload] };
       }
@@ -237,14 +229,15 @@ function Exercise(props) {
         const updatedSeriesList = [];
 
         while (updatedSeriesList.length !== state.seriesList.length) {
+          // eslint-disable-next-line no-loop-func
           state.seriesList.forEach((serie) => {
-            if (serie.serieCount === serieCount) updatedSeriesList.push(serie);
+            serie.serieCount = serieCount;
+            updatedSeriesList.push(serie);
+            serieCount = serieCount + 1;
           });
-
-          serieCount++;
         }
 
-        return { ...state, seriesList: updatedSeriesList };
+        return { ...state, seriesList: [...updatedSeriesList] };
       }
 
       case ACTIONS.CLEAR_SERIESLIST_BEFORE_DAY_CHANGING: {
@@ -287,29 +280,31 @@ function Exercise(props) {
         let previousDateIds = props.dateIds;
 
         // FILTERING LOCAL STORAGE TO SEARCH A EXERCISE WITH CORRECT EXERCISEID AND NUMBER OF SERIE
-        if (Object.keys(localStorage).length !== 0) {
-          Object.keys(localStorage).forEach((key) => {
-            if (key != 'token') {
-              let value = JSON.parse(localStorage.getItem(key));
 
-              if (value.exerciseId === props.exerciseId) {
-                if (value.serieCount === currentlyAddingSerieNumber + 1) {
-                  if (
-                    (value.dateIds.dayId < props.dateIds.dayId &&
-                      value.dateIds.monthId < props.dateIds.monthId &&
-                      value.dateIds.yearId === props.dateIds.yearId) ||
-                    (value.dateIds.dayId < props.dateIds.dayId &&
-                      value.dateIds.monthId === props.dateIds.monthId &&
-                      value.dateIds.yearId === props.dateIds.yearId) ||
-                    (value.dateIds.dayId >= props.dateIds.dayId &&
-                      value.dateIds.monthId < props.dateIds.monthId &&
-                      value.dateIds.yearId === props.dateIds.yearId) ||
-                    (value.dateIds.dayId >= props.dateIds.dayId &&
-                      value.dateIds.monthId >= props.dateIds.monthId &&
-                      value.dateIds.yearId < props.dateIds.yearId)
-                  )
-                    potentialSeries.push(value);
-                }
+        setTimeout(async () => {
+          const response = await axios.get('/api/item');
+
+          const items = response.data.items;
+          items.forEach((item) => {
+            let value = JSON.parse(item.item);
+
+            if (value.exerciseId === props.exerciseId) {
+              if (value.serieCount === currentlyAddingSerieNumber + 1) {
+                if (
+                  (value.dateIds.dayId < props.dateIds.dayId &&
+                    value.dateIds.monthId < props.dateIds.monthId &&
+                    value.dateIds.yearId === props.dateIds.yearId) ||
+                  (value.dateIds.dayId < props.dateIds.dayId &&
+                    value.dateIds.monthId === props.dateIds.monthId &&
+                    value.dateIds.yearId === props.dateIds.yearId) ||
+                  (value.dateIds.dayId >= props.dateIds.dayId &&
+                    value.dateIds.monthId < props.dateIds.monthId &&
+                    value.dateIds.yearId === props.dateIds.yearId) ||
+                  (value.dateIds.dayId >= props.dateIds.dayId &&
+                    value.dateIds.monthId >= props.dateIds.monthId &&
+                    value.dateIds.yearId < props.dateIds.yearId)
+                )
+                  potentialSeries.push(value);
               }
             }
           });
@@ -318,6 +313,7 @@ function Exercise(props) {
             while (true) {
               previousDateIds = getPreviousTrainingDate(previousDateIds);
 
+              // eslint-disable-next-line no-loop-func
               potentialSeries.forEach((serie) => {
                 if (
                   JSON.stringify(previousDateIds) ===
@@ -335,7 +331,7 @@ function Exercise(props) {
               }
             }
           }
-        }
+        });
 
         return {
           ...state,
@@ -354,23 +350,23 @@ function Exercise(props) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // LOADS DATA FROM LOCAL STORAGE AFTER DAY CHANGE
-  useEffect(() => {
-    let localStorageKeys = Object.keys(localStorage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(async () => {
+    const response = await axios.get('/api/item');
 
-    localStorageKeys.forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (
-          value.exerciseId === props.exerciseId &&
-          value.dateIds.dayId === props.dateIds.dayId &&
-          value.dateIds.monthId === props.dateIds.monthId &&
-          value.dateIds.yearId === props.dateIds.yearId
-        )
-          dispatch({ type: ACTIONS.ADD_SERIE_TO_SERIESLIST, payload: value });
-      }
+    const items = response.data.items;
+
+    items.forEach((item) => {
+      let value = JSON.parse(item.item);
+      if (
+        value.exerciseId === props.exerciseId &&
+        value.dateIds.dayId === props.dateIds.dayId &&
+        value.dateIds.monthId === props.dateIds.monthId &&
+        value.dateIds.yearId === props.dateIds.yearId
+      )
+        dispatch({ type: ACTIONS.ADD_SERIE_TO_SERIESLIST, payload: value });
+      dispatch({ type: ACTIONS.SORT_SERIESLIST });
     });
-
-    dispatch({ type: ACTIONS.SORT_SERIESLIST });
   }, [props.dateIds]);
 
   // CLEARS SERIESLIST AFTER DAY CHANGE
@@ -389,7 +385,6 @@ function Exercise(props) {
         uniqueList.push(serie);
       } else {
         serie.serieCount--;
-        localStorage.removeItem(serie.id);
       }
       dispatch({ type: ACTIONS.ADD_NEW_SERIE_LISTS, payload: uniqueList });
     });
@@ -478,7 +473,7 @@ function Exercise(props) {
     dispatch({ type: ACTIONS.NEGATE_MORE_WINDOW_STATE });
   };
 
-  const countProgress = () => {
+  const countProgress = async () => {
     const potentialTrainings = [];
     const lastTrainingData = [];
     let message = {};
@@ -487,45 +482,43 @@ function Exercise(props) {
     let previousDateIds = props.dateIds;
 
     // FILTERING LOCAL STORAGE TO SEARCH A EXERCISE WITH CORRECT EXERCISEID AND NUMBER OF SERIE
-    if (Object.keys(localStorage).length !== 0) {
-      Object.keys(localStorage).forEach((key) => {
-        if (key != 'token') {
-          let value = JSON.parse(localStorage.getItem(key));
+    const response = await axios.get('/api/item');
 
-          if (value.exerciseId === props.exerciseId) {
-            if (
-              (value.dateIds.dayId < props.dateIds.dayId &&
-                value.dateIds.monthId < props.dateIds.monthId &&
-                value.dateIds.yearId === props.dateIds.yearId) ||
-              (value.dateIds.dayId < props.dateIds.dayId &&
-                value.dateIds.monthId === props.dateIds.monthId &&
-                value.dateIds.yearId === props.dateIds.yearId) ||
-              (value.dateIds.dayId >= props.dateIds.dayId &&
-                value.dateIds.monthId < props.dateIds.monthId &&
-                value.dateIds.yearId === props.dateIds.yearId) ||
-              (value.dateIds.dayId >= props.dateIds.dayId &&
-                value.dateIds.monthId >= props.dateIds.monthId &&
-                value.dateIds.yearId < props.dateIds.yearId)
-            )
-              potentialTrainings.push(value);
-          }
-        }
-      });
+    const items = response.data.items;
+    items.forEach((item) => {
+      let value = JSON.parse(item.item);
 
-      if (potentialTrainings.length !== 0) {
-        while (true) {
-          previousDateIds = getPreviousTrainingDate(previousDateIds);
+      if (value.exerciseId === props.exerciseId) {
+        if (
+          (value.dateIds.dayId < props.dateIds.dayId &&
+            value.dateIds.monthId < props.dateIds.monthId &&
+            value.dateIds.yearId === props.dateIds.yearId) ||
+          (value.dateIds.dayId < props.dateIds.dayId &&
+            value.dateIds.monthId === props.dateIds.monthId &&
+            value.dateIds.yearId === props.dateIds.yearId) ||
+          (value.dateIds.dayId >= props.dateIds.dayId &&
+            value.dateIds.monthId < props.dateIds.monthId &&
+            value.dateIds.yearId === props.dateIds.yearId) ||
+          (value.dateIds.dayId >= props.dateIds.dayId &&
+            value.dateIds.monthId >= props.dateIds.monthId &&
+            value.dateIds.yearId < props.dateIds.yearId)
+        )
+          potentialTrainings.push(value);
+      }
+    });
 
-          potentialTrainings.forEach((training) => {
-            if (
-              JSON.stringify(previousDateIds) ===
-              JSON.stringify(training.dateIds)
-            )
-              lastTrainingData.push(training);
-          });
+    if (potentialTrainings.length !== 0) {
+      while (true) {
+        previousDateIds = getPreviousTrainingDate(previousDateIds);
 
-          if (lastTrainingData.length !== 0) break;
-        }
+        potentialTrainings.forEach((training) => {
+          if (
+            JSON.stringify(previousDateIds) === JSON.stringify(training.dateIds)
+          )
+            lastTrainingData.push(training);
+        });
+
+        if (lastTrainingData.length !== 0) break;
       }
     }
 
@@ -628,13 +621,57 @@ function Exercise(props) {
   const handleSerieAdding = (e) => {
     e.preventDefault();
     setTimeout(() => {
-      dispatch({ type: ACTIONS.ADD_SERIE });
+      const updatedSeriesList = state.seriesList;
+      let serieCount = 1;
+
+      // ADDING SERIE TO SERIESLIST
+      state.newSerie.id = Date.now();
+      state.newSerie.dateIds = props.dateIds;
+      updatedSeriesList.push(state.newSerie);
+
+      // SERIE ORDER COUNTING
+      updatedSeriesList.forEach((serie) => {
+        serie.serieCount = serieCount;
+        serieCount++;
+        console.log(serieCount);
+      });
+
+      axios.post('/api/item', {
+        itemId: state.newSerie.id,
+        item: JSON.stringify(state.newSerie),
+      });
+
+      dispatch({ type: ACTIONS.ADD_SERIE, payload: updatedSeriesList });
     }, 10);
     dispatch({ type: ACTIONS.NEGATE_ADD_WINDOW_STATE });
   };
 
   const handleSerieRemoving = (checkedIdsList) => {
-    dispatch({ type: ACTIONS.REMOVE_SERIE, payload: checkedIdsList });
+    let updatedSeriesList = state.seriesList;
+
+    let serieCount = 1;
+
+    checkedIdsList.forEach((checkedId) => {
+      updatedSeriesList.forEach((serie, index) => {
+        axios.put('/api/item', { itemId: serie.id });
+        if (Number(serie.id) === Number(checkedId))
+          updatedSeriesList.splice(index, 1);
+      });
+    });
+
+    // SERIE ORDER COUNTING
+    updatedSeriesList.forEach((serie) => {
+      axios.post('/api/item', {
+        itemId: serie.id,
+        item: JSON.stringify({ ...serie, serieCount }),
+      });
+      serieCount += 1;
+    });
+
+    dispatch({ type: ACTIONS.SORT_SERIESLIST });
+
+    dispatch({ type: ACTIONS.REMOVE_SERIE, payload: updatedSeriesList });
+
     dispatch({ type: ACTIONS.NEGATE_REMOVE_WINDOW_STATE });
   };
 

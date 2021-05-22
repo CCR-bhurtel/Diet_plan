@@ -1,25 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cookie&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cookie&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cookie&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Secular+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cookie&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;400;700&display=swap');
 * {
   margin: 0;
   padding: 0;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   -webkit-box-shadow: 0;
-          box-shadow: 0;
+  box-shadow: 0;
   border: none;
-  font-family: "Noto Sans", sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-weight: normal;
   text-decoration: none;
   font-size: 16px;
 }
-
+.right-section {
+  font-weight: 800 !important;
+}
 @media (max-width: 1600px) {
   .right-section__gauge-container {
     width: 130px;
@@ -33,21 +35,24 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 18px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 30px;
+    font-size: medium;
     z-index: 3;
   }
   .right-section__gauge-container__text > * {
     padding-bottom: 5px;
   }
   .right-section__gauge-container__text__amount {
-    font-size: 1.5rem;
+    font-size: 2rem;
     padding-bottom: 0;
   }
   .right-section__gauge-container__text__amount--kcal {
@@ -63,9 +68,11 @@
   }
   .right-section__gauge-container__text__percent {
     font-size: 0.7rem;
+    color: #ffffff !important;
   }
   .right-section__gauge-container__text__percent--kcal {
     font-size: 0.8rem;
+    color: #ffffff !important;
   }
   .right-section__gauge-container__text__left {
     font-size: 0.8rem;
@@ -96,11 +103,13 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 12px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 25px;
@@ -152,29 +161,29 @@
 @-webkit-keyframes gaugeAnimation {
   0% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   50% {
     -webkit-transform: rotate(270deg);
-            transform: rotate(270deg);
+    transform: rotate(270deg);
   }
   100% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
 }
 @keyframes gaugeAnimation {
   0% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
   50% {
     -webkit-transform: rotate(270deg);
-            transform: rotate(270deg);
+    transform: rotate(270deg);
   }
   100% {
     -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
+    transform: rotate(0deg);
   }
 }
 .right-section {
@@ -183,13 +192,13 @@
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -ms-flex-pack: distribute;
-      justify-content: space-around;
+  justify-content: space-around;
   width: 21%;
   height: 100%;
   background: #08c096;
@@ -202,11 +211,11 @@
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   position: relative;
   width: 150px;
   height: 150px;
@@ -215,7 +224,7 @@
   background: #08c096;
 }
 .right-section__gauge-container:before {
-  content: "";
+  content: '';
   display: block;
   width: 76.5px;
   height: 76.5px;
@@ -223,7 +232,7 @@
   bottom: -11%;
   z-index: 2;
   -webkit-transform: rotate(45deg);
-          transform: rotate(45deg);
+  transform: rotate(45deg);
   background: #08c096;
 }
 .right-section__gauge-container__bar {
@@ -233,12 +242,14 @@
   width: 100%;
   height: 100%;
   border: 15px solid;
-  border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+    rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   border-radius: 50%;
 }
 .right-section__gauge-container__bar--kcal {
   border: 18px solid;
-  border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+    rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
 }
 .right-section__gauge-container__text {
   position: absolute;
@@ -251,16 +262,16 @@
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   padding-bottom: 10px;
 }
 .right-section__gauge-container__text__amount {
   font-size: 1.6rem;
-  color: #FFFFFF;
+  color: #ffffff;
   padding-bottom: 0;
 }
 .right-section__gauge-container__text__amount--kcal {
@@ -268,7 +279,7 @@
 }
 .right-section__gauge-container__text__name {
   font-size: 0.6rem;
-  color: #FFFFFF;
+  color: #ffffff;
   padding-bottom: 15px;
 }
 .right-section__gauge-container__text__name--kcal {
@@ -284,7 +295,7 @@
 }
 .right-section__gauge-container__text__left {
   font-size: 0.9rem;
-  color: #FFFFFF;
+  color: #ffffff;
 }
 .right-section__gauge-container__text__left--kcal {
   font-size: 1rem;
@@ -303,11 +314,11 @@
   margin: 0;
   padding: 0;
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
   -webkit-box-shadow: 0;
-          box-shadow: 0;
+  box-shadow: 0;
   border: none;
-  font-family: "Noto Sans", sans-serif;
+  font-family: 'Noto Sans', sans-serif;
   font-weight: normal;
   text-decoration: none;
   font-size: 16px;
@@ -326,11 +337,13 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 18px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 30px;
@@ -389,11 +402,13 @@
   .right-section__gauge-container__bar {
     z-index: 1;
     border: 12px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__bar--kcal {
     border: 15px solid;
-    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.25)
+      rgba(255, 255, 255, 0.5) rgba(255, 255, 255, 0.25);
   }
   .right-section__gauge-container__text {
     top: 25px;

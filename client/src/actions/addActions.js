@@ -1,27 +1,19 @@
+import axios from 'axios';
+
 const ACTIONS = {
   SET_PRODUCT_SEND_FOR_EDIT: 'set-product-send-for-edit',
   NEGATE_EDIT_WINDOW_STATE: 'negate-edit-window-state',
   UPDATE_SAVED_PRODUCTS_LIST: 'update-saved-products-list',
-  LOAD_PREDEFINED_PRODUCTS_LIST_FROM_LOCAL_STORAGE:
-    'load-predefined-products-list-from-local-storage',
+  LOAD_PREDEFINED_PRODUCTS_LIST_FROM_DATABASE:
+    'load-predefined-products-list-from-database',
   SET_IS_ADD_BUTTON_DISABLED: 'set-is-add-button-disabled',
 };
 
-export const load_predefined = (predefinedProductsList) => (dispatch) => {
+export const loadPredefined = (productList) => (dispatch) => {
   dispatch({
-    type: ACTIONS.LOAD_PREDEFINED_PRODUCTS_LIST_FROM_LOCAL_STORAGE,
-    payload: predefinedProductsList,
+    type: ACTIONS.LOAD_PREDEFINED_PRODUCTS_LIST_FROM_DATABASE,
+    payload: productList,
   });
-};
-
-export const getIndexOfProduct = (targetId, state) => {
-  const productList = state.savedProductList;
-  let returnedIndex = 0;
-
-  productList.forEach((product, index) => {
-    if (product.id === Number(targetId)) returnedIndex = index;
-  });
-  return returnedIndex;
 };
 
 export const handleSelected = (e, state) => (dispatch) => {
@@ -51,11 +43,23 @@ export const handleSelected = (e, state) => (dispatch) => {
     }
   }
 };
+
 export const updateProductSendForEdit = (selectedProduct) => (dispatch) => {
+  console.log(selectedProduct);
   dispatch({
     type: ACTIONS.SET_PRODUCT_SEND_FOR_EDIT,
     payload: selectedProduct,
   });
+};
+
+export const getIndexOfProduct = (targetId, state) => {
+  const productList = state.savedProductList;
+  let returnedIndex = 0;
+
+  productList.forEach((product, index) => {
+    if (product.id === Number(targetId)) returnedIndex = index;
+  });
+  return returnedIndex;
 };
 
 export const handleProductEditing = (editedProduct, state) => (dispatch) => {
@@ -67,7 +71,10 @@ export const handleProductEditing = (editedProduct, state) => (dispatch) => {
 
   // SAVING CHANGES TO LOCAL STORAGE
   const predefinedProductsList = state.savedProductList;
-  localStorage.setItem('predefined', JSON.stringify(predefinedProductsList));
+
+  axios.post('/api/predefined', {
+    predefined: JSON.stringify(predefinedProductsList),
+  });
 
   dispatch(handleEditingWindow());
 };

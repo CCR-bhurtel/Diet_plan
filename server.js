@@ -5,11 +5,7 @@ const app = require('./app');
 
 dotenv.config({ path: './config.env' });
 
-const db = process.env.DATABASE.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
-);
-
+const db = process.env.DATABASE;
 process.on('uncaughtException', (err) => {
   console.log('Uncaught exception: shutting down the app');
   console.log(err.name, err.message);

@@ -17,6 +17,7 @@ const ACTIONS = {
   LOAD_SETTINGS: 'load-settings',
 
   SET_USER_STATUS: 'set-user-status',
+  CLEAR_ALL_PRODUCTS: 'clear-all-products',
 };
 
 const initialState = {
@@ -158,6 +159,10 @@ export default function (state = initialState, action) {
 
     case ACTIONS.SET_USER_STATUS: {
       return { ...state, userStatus: action.payload };
+    }
+
+    case ACTIONS.CLEAR_ALL_PRODUCTS: {
+      return { ...state, mealsIngredientsSummary: [] };
     }
 
     default:

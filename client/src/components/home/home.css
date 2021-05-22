@@ -3,5 +3,5 @@
   align-items: center;
   justify-content: center;
   flex-direction: row;
-  min-width: 100vw;
+  /* min-width: 100vw; */
 }

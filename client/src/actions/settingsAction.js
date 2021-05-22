@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const ACTIONS = {
   NEGATE_CATEGORY_OPENED: 'negate-category-opened',
   CHANGE_SETTINGS_DATA: 'change-settings-data',
@@ -10,48 +12,20 @@ const ACTIONS = {
   SET_SETTINGS_CHANGED_STATE: 'set-settings-changed-state',
   RESET_NUTRITION_SETTINGS_TO_INITIAL: 'reset-nutrition-settings-to-initial',
   RESET_TRAINING_SETTINGS_TO_INITIAL: 'reset-training-settings-to-initial',
+  UPDATE_TRAINING_LIST: 'update-training-list',
 };
 
-export const handleOpening = () => (dispatch) => {
-  dispatch({ type: ACTIONS.NEGATE_CATEGORY_OPENED });
+export const updateTrainingList = (uniqueList) => (dispatch) => {
+  dispatch({ type: ACTIONS.UPDATE_TRAINING_LIST, payload: uniqueList });
 };
 
-export const resetCheckbox = (idOfCheckbox) => (dispatch) => {
-  document.querySelector('#' + idOfCheckbox).checked = false;
+export const setSettingsChangedState = (cState) => (dispatch) => {
+  dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: cState });
 };
 
-export const saveSettingsToLocalStorage = (state) => (dispatch) => {
-  localStorage.setItem('settings', JSON.stringify(state.settingsData));
-};
-
-export const restoreSettingFromLocalStorage = () => (dispatch) => {
-  dispatch({ type: ACTIONS.LOAD_SETTINGS });
-};
-
-export const confirmClearAllProducts = () => (dispatch) => {
-  dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-
-  Object.keys(localStorage).forEach((key) => {
-    let value = JSON.parse(localStorage.getItem(key));
-    if (value.mealId >= 0) localStorage.removeItem(key);
-  });
-};
-
-export const cancelClearAllProducts = () => (dispatch) => {
-  dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-};
-
-export const confirmClearAllSeries = () => (dispatch) => {
-  dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
-
-  Object.keys(localStorage).forEach((key) => {
-    let value = JSON.parse(localStorage.getItem(key));
-    if (value.exerciseId >= 0) localStorage.removeItem(key);
-  });
-};
-
-export const cancelClearAllSeries = () => (dispatch) => {
-  dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
+export const handleOpening = (category) => (dispatch) => {
+  console.log(category);
+  dispatch({ type: ACTIONS.NEGATE_CATEGORY_OPENED, payload: category });
 };
 
 export const resetOptionsStates = (optionsStates) => {
@@ -59,40 +33,91 @@ export const resetOptionsStates = (optionsStates) => {
     optionsStates[key] = false;
   });
 };
-export const handleSettingsSaved = (e, optionsStates, props) => (dispatch) => {
-  e.preventDefault();
 
-  if (optionsStates['clear-all-products'])
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: true });
-  if (optionsStates['reset-nutrition-to-initial'])
-    dispatch({
-      type: ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL,
-      payload: props.initialData,
-    });
-  if (optionsStates['clear-all-series'])
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: true });
-  if (optionsStates['reset-training-to-initial'])
-    dispatch({
-      type: ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL,
-      payload: props.initialData,
-    });
+export const saveSettingsToDatabase = (state) => async (dispatch) => {
+  const response = await axios.put('/api/setting', {
+    setting: JSON.stringify(state.settingsData),
+  });
+  console.log(response);
+};
 
-  dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
-  saveSettingsToLocalStorage();
-  resetOptionsStates();
+export const restoreSettingFromDatabase = () => async (dispatch) => {
+  const response = await axios.get('/api/setting');
+  console.log(response.data);
+
+  const newSettings = JSON.parse(response.data.setting.setting);
+  dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });
+};
+
+export const confirmClearAllProducts = (props) => async (dispatch) => {
+  dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
+  // props.clearAllProducts();
   props.updateGauges(props.home);
+
+  const response = await axios.get('/api/item');
+
+  const items = response.data.items;
+
+  items.forEach((item) => {
+    let value = JSON.parse(item.item);
+    if (value.mealId >= 0) axios.put('/api/item', { itemId: value.id });
+  });
 };
 
-export const handleSettingChangedState = (condition) => (dispatch) => {
-  dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: condition });
+export const cancelClearAllProducts = () => (dispatch) => {
+  dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
 };
 
-export const handleSettingsCanceled = (e, props) => {
-  e.preventDefault();
-  restoreSettingFromLocalStorage();
-  resetOptionsStates();
-  props.updateGauges(props.home);
+export const confirmClearAllSeries = () => async (dispatch) => {
+  const response = await axios.get('/api/item');
+
+  const items = response.data.items;
+
+  items.forEach((item) => {
+    let value = JSON.parse(item.item);
+    if (value.exerciseId >= 0) axios.put('/api/item', { itemId: value.id });
+  });
+
+  dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
 };
+
+export const cancelClearAllSeries = () => (dispatch) => {
+  dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
+};
+
+export const handleSettingsSaved =
+  (e, optionsStates, props, state) => (dispatch) => {
+    e.preventDefault();
+
+    if (optionsStates['clear-all-products'])
+      dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: true });
+    if (optionsStates['reset-nutrition-to-initial'])
+      dispatch({
+        type: ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL,
+        payload: props,
+      });
+    if (optionsStates['clear-all-series'])
+      dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: true });
+    if (optionsStates['reset-training-to-initial'])
+      dispatch({
+        type: ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL,
+        payload: props,
+      });
+
+    dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
+    dispatch(saveSettingsToDatabase(state));
+    resetOptionsStates(optionsStates);
+    props.updateGauges(props.home);
+    props.updateHome(state.settingsData);
+  };
+
+export const handleSettingsCanceled =
+  (e, props, optionsStates) => (dispatch) => {
+    e.preventDefault();
+    dispatch(restoreSettingFromDatabase());
+    resetOptionsStates(optionsStates);
+    props.updateGauges(props.home);
+  };
 
 export const handleExerciseChoosing = (e) => (dispatch) => {
   if (e.target.style.backgroundColor) {

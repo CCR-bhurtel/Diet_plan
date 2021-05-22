@@ -1,11 +1,9 @@
 import { warnings } from '../components/meal/meal';
-
 const ACTIONS = {
   UPDATE_PRODUCT_DATA: 'update-product-data',
   RESET_FORM: 'reset-form',
   SET_WARNING: 'set-warning',
   CLEAR_WARNING: 'clear-warning',
-  SET_INITIAL: 'set-initial',
 };
 
 const initialState = {
@@ -71,14 +69,14 @@ export default function (state = initialState, action) {
             productData: { ...state.productData, kcal: action.payload.value },
           };
         }
-        default: {
+        default:
           return state;
-        }
       }
     }
 
     case ACTIONS.RESET_FORM: {
       const props = action.payload;
+
       return {
         ...state,
         productData: {

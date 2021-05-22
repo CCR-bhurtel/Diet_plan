@@ -3,39 +3,25 @@ import { exercises } from '../../exercisesList';
 import '../../components/product_removing_window/styles/productRemovingWindow.css';
 import '../../components/product_adding_window/styles/productAddingWindow.css';
 import { connect } from 'react-redux';
-import { changePageTitle } from '../../actions/homeActions';
+
 import axios from 'axios';
 
-const initialState = {
-  isCategoryOpened: false,
-  settingsData: {
-    account: {},
-
-    nutrition: {
-      dailyDemand: { kcal: 2000, proteins: 120, fats: 55, carbs: 240 },
-      namesOfMeals: {
-        0: 'Breakfast',
-        1: 'II Breakfast',
-        2: 'Lunch',
-        3: 'Snack',
-        4: 'Dinner',
-        5: '',
-        6: '',
-        7: '',
-        8: '',
-        9: '',
-      },
-      numberOfMeals: 5,
-    },
-
-    training: {
-      selectedExercises: [0, 1, 2, 3, 5],
-    },
-  },
-  clearAllProducts: false,
-  clearAllSeries: false,
-  isSettingsChanged: false,
-};
+import {
+  handleOpening,
+  resetOptionsStates,
+  saveSettingsToDatabase,
+  restoreSettingFromDatabase,
+  confirmClearAllProducts,
+  cancelClearAllProducts,
+  confirmClearAllSeries,
+  cancelClearAllSeries,
+  handleSettingsSaved,
+  handleSettingsCanceled,
+  handleExerciseChoosing,
+  handleSettingOnChange,
+  updateTrainingList,
+  setSettingsChangedState,
+} from '../../actions/settingsAction';
 
 const ACTIONS = {
   NEGATE_CATEGORY_OPENED: 'negate-category-opened',
@@ -53,142 +39,24 @@ const ACTIONS = {
 };
 
 function Settings(props) {
-  const reducer = (state, action) => {
-    switch (action.type) {
-      case ACTIONS.NEGATE_CATEGORY_OPENED: {
-        return { ...state, isCategoryOpened: !state.isCategoryOpened };
-      }
+  let state = props.settings;
 
-      case ACTIONS.UPDATE_TRAINING_LIST:
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: { selectedExercises: action.payload },
-          },
-        };
-      case ACTIONS.CHANGE_SETTINGS_DATA: {
-        switch (action.payload.key) {
-          case 'editMealName': {
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  namesOfMeals: {
-                    ...state.settingsData.nutrition.namesOfMeals,
-                    [action.payload.index]: action.payload.value,
-                  },
-                },
-              },
-            };
-          }
-
-          case 'setMealsNumber': {
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  numberOfMeals: action.payload.value,
-                },
-              },
-            };
-          }
-
-          default:
-            return {
-              ...state,
-              settingsData: {
-                ...state.settingsData,
-                nutrition: {
-                  ...state.settingsData.nutrition,
-                  dailyDemand: {
-                    ...state.settingsData.nutrition.dailyDemand,
-                    [action.payload.key]: action.payload.value,
-                  },
-                },
-              },
-            };
-        }
-      }
-
-      case ACTIONS.LOAD_SETTINGS: {
-        // let newSettings = JSON.parse(localStorage.getItem('settings'));
-        return { ...state, settingsData: action.payload };
-      }
-
-      case ACTIONS.SET_CLEAR_ALL_PRODUCTS: {
-        return { ...state, clearAllProducts: action.payload };
-      }
-
-      case ACTIONS.SET_CLEAR_ALL_SERIES: {
-        return { ...state, clearAllSeries: action.payload };
-      }
-
-      case ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES: {
-        const updatedSelectedExercises =
-          state.settingsData.training.selectedExercises;
-        updatedSelectedExercises.push(action.payload);
-
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: {
-              ...state.settingsData.training,
-              selectedExercises: updatedSelectedExercises,
-            },
-          },
-        };
-      }
-
-      case ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES: {
-        const updatedSelectedExercises =
-          state.settingsData.training.selectedExercises;
-        const indexOfExerciseToRemoving = updatedSelectedExercises.indexOf(
-          action.payload
-        );
-        updatedSelectedExercises.splice(indexOfExerciseToRemoving, 1);
-
-        return {
-          ...state,
-          settingsData: {
-            ...state.settingsData,
-            training: {
-              ...state.settingsData.training,
-              selectedExercises: updatedSelectedExercises,
-            },
-          },
-        };
-      }
-
-      case ACTIONS.SET_SETTINGS_CHANGED_STATE: {
-        return { ...state, isSettingsChanged: action.payload };
-      }
-
-      case ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL: {
-        return {
-          ...state,
-          settingsData: { ...state.settingsData, nutrition: props.initialData },
-        };
-      }
-
-      case ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL: {
-        console.log(state.settingsData.training.selectedExercises);
-        return {
-          ...state,
-          settingsData: { ...state.settingsData, training: props.initialData },
-        };
-      }
-
-      default:
-        return console.error(`Unknown action type: ${action.type}`);
-    }
-  };
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const {
+    handleOpening,
+    resetOptionsStates,
+    saveSettingsToDatabase,
+    restoreSettingFromDatabase,
+    confirmClearAllProducts,
+    cancelClearAllProducts,
+    confirmClearAllSeries,
+    cancelClearAllSeries,
+    handleSettingsSaved,
+    handleSettingsCanceled,
+    handleExerciseChoosing,
+    handleSettingOnChange,
+    updateTrainingList,
+    setSettingsChangedState,
+  } = props;
   const initialOptionsStates = {
     'clear-all-products': false,
     'reset-nutrition-to-initial': false,
@@ -200,12 +68,8 @@ function Settings(props) {
 
   // EFFECT WHICH CHECKS IS SETTINGS ARE SAVED IN LOCAL STORAGE
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(async () => {
-    const response = await axios.get('/api/setting');
-    console.log(response.data);
-
-    const newSettings = JSON.parse(response.data.setting.setting);
-    dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });
+  useEffect(() => {
+    restoreSettingFromDatabase();
   }, []);
 
   useEffect(() => {
@@ -215,8 +79,7 @@ function Settings(props) {
         uniqueList.push(id);
       }
     });
-
-    dispatch({ type: ACTIONS.UPDATE_TRAINING_LIST, payload: uniqueList });
+    updateTrainingList(uniqueList);
   }, [state.settingsData.training.selectedExercises.length]);
 
   // EFFECT WHICH ENABLE POINTER EVENTS AFTER OPENING CONFIRM WINDOW
@@ -264,158 +127,13 @@ function Settings(props) {
 
     const currentSettings = JSON.stringify(state.settingsData);
 
-    if (databaseSettings === currentSettings)
-      dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
-    else dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: true });
+    if (databaseSettings === currentSettings) setSettingsChangedState(false);
+    else setSettingsChangedState(true);
   }, [state.settingsData]);
 
-  const handleOpening = () => {
-    dispatch({ type: ACTIONS.NEGATE_CATEGORY_OPENED });
-  };
-
-  const resetCheckbox = (idOfCheckbox) => {
-    document.querySelector('#' + idOfCheckbox).checked = false;
-  };
-
-  const resetOptionsStates = () => {
-    Object.keys(optionsStates).forEach((key) => {
-      optionsStates[key] = false;
-    });
-  };
-
-  const saveSettingsToLocalStorage = async () => {
-    const response = await axios.put('/api/setting', {
-      setting: JSON.stringify(state.settingsData),
-    });
-    console.log(response);
-  };
-
-  const restoreSettingFromLocalStorage = async () => {
-    const response = await axios.get('/api/setting');
-    console.log(response.data);
-
-    const newSettings = JSON.parse(response.data.setting.setting);
-    dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });
-  };
-
-  const confirmClearAllProducts = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-
-    Object.keys(localStorage).forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (value.mealId >= 0) localStorage.removeItem(key);
-      }
-    });
-    changePageTitle('dashboard');
-  };
-
-  const cancelClearAllProducts = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: false });
-  };
-
-  const confirmClearAllSeries = () => {
-    Object.keys(localStorage).forEach((key) => {
-      if (key != 'token') {
-        let value = JSON.parse(localStorage.getItem(key));
-        if (value.exerciseId >= 0) localStorage.removeItem(key);
-      }
-    });
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
-  };
-
-  const cancelClearAllSeries = () => {
-    dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: false });
-  };
-
-  const handleSettingsSaved = (e) => {
-    e.preventDefault();
-
-    if (optionsStates['clear-all-products'])
-      dispatch({ type: ACTIONS.SET_CLEAR_ALL_PRODUCTS, payload: true });
-    if (optionsStates['reset-nutrition-to-initial'])
-      dispatch({ type: ACTIONS.RESET_NUTRITION_SETTINGS_TO_INITIAL });
-    if (optionsStates['clear-all-series'])
-      dispatch({ type: ACTIONS.SET_CLEAR_ALL_SERIES, payload: true });
-    if (optionsStates['reset-training-to-initial'])
-      dispatch({ type: ACTIONS.RESET_TRAINING_SETTINGS_TO_INITIAL });
-
-    dispatch({ type: ACTIONS.SET_SETTINGS_CHANGED_STATE, payload: false });
-    saveSettingsToLocalStorage();
-    resetOptionsStates();
-    props.updateGauges(props.home);
-    props.updateHome(state.settingsData);
-  };
-
-  const handleSettingsCanceled = (e) => {
-    e.preventDefault();
-    restoreSettingFromLocalStorage();
-    resetOptionsStates();
-    props.updateGauges(props.home);
-  };
-
-  const handleExerciseChoosing = (e) => {
-    if (e.target.style.backgroundColor) {
-      if (e.target.style.backgroundColor === 'transparent')
-        dispatch({
-          type: ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-      else
-        dispatch({
-          type: ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-    } else {
-      if (e.target.children[0].style.backgroundColor === 'transparent')
-        dispatch({
-          type: ACTIONS.ADD_EXERCISE_TO_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-      else
-        dispatch({
-          type: ACTIONS.REMOVE_EXERCISE_FROM_SELECTEDEXERCISES,
-          payload: Number(e.target.id[e.target.id.length - 1]),
-        });
-    }
-  };
-
-  const handleSettingOnChange = (e) => {
-    const isNumber = /[0-9]/;
-    const isZero = /^[0]{1}/;
-
-    e.preventDefault();
-
-    if (e.target.id === 'editMealName') {
-      dispatch({
-        type: ACTIONS.CHANGE_SETTINGS_DATA,
-        payload: {
-          key: e.target.id,
-          index: Number(e.target.attributes['data-key'].value),
-          value: e.target.value,
-        },
-      });
-    }
-
-    if (isNumber.test(e.target.value[e.target.value.length - 1])) {
-      if (isZero.test(e.target.value))
-        dispatch({
-          type: ACTIONS.CHANGE_SETTINGS_DATA,
-          payload: { key: e.target.id, value: 1 },
-        });
-      else
-        dispatch({
-          type: ACTIONS.CHANGE_SETTINGS_DATA,
-          payload: { key: e.target.id, value: e.target.value },
-        });
-    } else
-      dispatch({
-        type: ACTIONS.CHANGE_SETTINGS_DATA,
-        payload: { key: e.target.id, value: '' },
-      });
-
-    props.updateGauges(props.home);
-  };
+  // const resetCheckbox = (idOfCheckbox) => {
+  //   document.querySelector('#' + idOfCheckbox).checked = false;
+  // };
 
   const handleCheckboxOnClick = (e) => {
     setOptionsStates((prevOptions) => {
@@ -427,58 +145,32 @@ function Settings(props) {
     <>
       <div
         className="meal"
-        style={state.isCategoryOpened ? { left: '-10px' } : { left: '0px' }}
+        style={
+          ((state.category == 'Nutrition') & state.isCategoryOpenedNutrition) |
+          ((state.category == 'Training') & state.isCategoryOpenedTraining)
+            ? { left: '-10px' }
+            : { left: '0px' }
+        }
       >
-        <section className="meal__top-section" onClick={handleOpening}>
+        <section
+          className="meal__top-section"
+          onClick={() => {
+            handleOpening(props.category);
+          }}
+        >
           <h2 className="meal__top-section__meal-title">{props.category}</h2>
         </section>
 
         <section
           className="meal__products-section meal__products-section--settings"
           style={
-            state.isCategoryOpened ? { display: 'flex' } : { display: 'none' }
+            (state.isCategoryOpenedNutrition &
+              (props.category === 'Nutrition')) |
+            (state.isCategoryOpenedTraining & (props.category === 'Training'))
+              ? { display: 'flex' }
+              : { display: 'none' }
           }
         >
-          {props.category === 'Account' && (
-            <section className="center-section__main__settings">
-              <form
-                className="center-section__main__settings__form"
-                onSubmit={handleSettingsSaved}
-              >
-                <section className="center-section__main__settings__form__section"></section>
-
-                <section
-                  className="meal__buttons-section meal__buttons-section--settings"
-                  style={
-                    state.isCategoryOpened
-                      ? { display: 'flex' }
-                      : { display: 'none' }
-                  }
-                >
-                  <div>
-                    <button
-                      className="meal__buttons-section__remove-button"
-                      onClick={handleSettingsCanceled}
-                      type="button"
-                      disabled={state.isSettingsChanged ? false : true}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      className="meal__buttons-section__add-button"
-                      type="submit"
-                      value="Save"
-                      id="saveSettings"
-                    >
-                      Save
-                    </button>
-                  </div>
-                </section>
-              </form>
-            </section>
-          )}
-
           {props.category === 'Nutrition' && (
             <section className="center-section__main__settings">
               {state.clearAllProducts && (
@@ -502,7 +194,9 @@ function Settings(props) {
                       </button>
                       <button
                         className="removing-window__main__list__buttons-section__primary"
-                        onClick={confirmClearAllProducts}
+                        onClick={() => {
+                          confirmClearAllProducts(props);
+                        }}
                       >
                         Remove
                       </button>
@@ -513,99 +207,120 @@ function Settings(props) {
 
               <form
                 className="adding-window__main__form"
-                onSubmit={handleSettingsSaved}
+                onSubmit={(e) => {
+                  handleSettingsSaved(e, optionsStates, props, state);
+                }}
               >
                 <section className="adding-window__main__form adding-window__main__form--daily-demand">
                   <h3 className="adding-window__main__form__title">
                     Daily demand
                   </h3>
 
-                  <div className="adding-window__main__form__line adding-window__main__form__line--short">
-                    <label
-                      className="adding-window__main__form__line__label"
-                      htmlFor="proteins"
-                    >
-                      Proteins
-                    </label>
-                    <input
-                      className="adding-window__main__form__line__input"
-                      type="text"
-                      id="proteins"
-                      value={state.settingsData.nutrition.dailyDemand.proteins}
-                      onChange={handleSettingOnChange}
-                      placeholder="Proteins"
-                      maxLength="4"
-                    ></input>
-                    <span className="adding-window__main__form__line__decoration">
-                      g
-                    </span>
-                    {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
-                  </div>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <div className="adding-window__main__form__line adding-window__main__form__line--short">
+                      <label
+                        className="adding-window__main__form__line__label"
+                        htmlFor="proteins"
+                      >
+                        Proteins
+                      </label>
+                      <input
+                        className="adding-window__main__form__line__input"
+                        type="text"
+                        id="proteins"
+                        value={
+                          state.settingsData.nutrition.dailyDemand.proteins
+                        }
+                        onChange={(e) => {
+                          handleSettingOnChange(e, props);
+                        }}
+                        placeholder="Proteins"
+                        maxLength="4"
+                      ></input>
+                      <span className="adding-window__main__form__line__decoration">
+                        g
+                      </span>
+                      {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                    </div>
 
-                  <div className="adding-window__main__form__line adding-window__main__form__line--short">
-                    <label
-                      className="adding-window__main__form__line__label"
-                      htmlFor="fats"
-                    >
-                      Fats
-                    </label>
-                    <input
-                      className="adding-window__main__form__line__input"
-                      type="text"
-                      id="fats"
-                      value={state.settingsData.nutrition.dailyDemand.fats}
-                      onChange={handleSettingOnChange}
-                      placeholder="Fats"
-                      maxLength="4"
-                    ></input>
-                    <span className="adding-window__main__form__line__decoration">
-                      g
-                    </span>
-                    {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
-                  </div>
+                    <div className="adding-window__main__form__line adding-window__main__form__line--short">
+                      <label
+                        className="adding-window__main__form__line__label"
+                        htmlFor="fats"
+                      >
+                        Fats
+                      </label>
+                      <input
+                        className="adding-window__main__form__line__input"
+                        type="text"
+                        id="fats"
+                        value={state.settingsData.nutrition.dailyDemand.fats}
+                        onChange={(e) => {
+                          handleSettingOnChange(e, props);
+                        }}
+                        placeholder="Fats"
+                        maxLength="4"
+                      ></input>
+                      <span className="adding-window__main__form__line__decoration">
+                        g
+                      </span>
+                      {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                    </div>
 
-                  <div className="adding-window__main__form__line adding-window__main__form__line--short">
-                    <label
-                      className="adding-window__main__form__line__label"
-                      htmlFor="Carbs"
-                    >
-                      Carbs
-                    </label>
-                    <input
-                      className="adding-window__main__form__line__input"
-                      type="text"
-                      id="Carbs"
-                      value={state.settingsData.nutrition.dailyDemand.carbs}
-                      onChange={handleSettingOnChange}
-                      placeholder="Carbs"
-                      maxLength="4"
-                    ></input>
-                    <span className="adding-window__main__form__line__decoration">
-                      g
-                    </span>
-                    {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
-                  </div>
+                    <div className="adding-window__main__form__line adding-window__main__form__line--short">
+                      <label
+                        className="adding-window__main__form__line__label"
+                        htmlFor="Carbs"
+                      >
+                        Carbs
+                      </label>
+                      <input
+                        className="adding-window__main__form__line__input"
+                        type="text"
+                        id="Carbs"
+                        value={state.settingsData.nutrition.dailyDemand.carbs}
+                        onChange={(e) => {
+                          handleSettingOnChange(e, props);
+                        }}
+                        placeholder="Carbs"
+                        maxLength="4"
+                      ></input>
+                      <span className="adding-window__main__form__line__decoration">
+                        g
+                      </span>
+                      {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                    </div>
 
-                  <div className="adding-window__main__form__line adding-window__main__form__line--short">
-                    <label
-                      className="adding-window__main__form__line__label"
-                      htmlFor="kcal"
-                    >
-                      Calories
-                    </label>
-                    <input
-                      className="adding-window__main__form__line__input"
-                      type="text"
-                      id="kcal"
-                      value={state.settingsData.nutrition.dailyDemand.kcal}
-                      onChange={handleSettingOnChange}
-                      placeholder="Calories"
-                      maxLength="4"
-                    ></input>
-                    <span className="adding-window__main__form__line__decoration">
-                      kcal
-                    </span>
-                    {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                    <div className="adding-window__main__form__line adding-window__main__form__line--short">
+                      <label
+                        className="adding-window__main__form__line__label"
+                        htmlFor="kcal"
+                      >
+                        Calories
+                      </label>
+                      <input
+                        className="adding-window__main__form__line__input"
+                        type="text"
+                        id="kcal"
+                        value={state.settingsData.nutrition.dailyDemand.kcal}
+                        onChange={(e) => {
+                          handleSettingOnChange(e, props);
+                        }}
+                        placeholder="Calories"
+                        maxLength="4"
+                      ></input>
+                      <span className="adding-window__main__form__line__decoration">
+                        kcal
+                      </span>
+                      {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
+                    </div>
                   </div>
                 </section>
 
@@ -619,12 +334,15 @@ function Settings(props) {
                     >
                       Number of meals
                     </label>
+
                     <input
                       className="adding-window__main__form__line__input"
                       type="text"
                       id="setMealsNumber"
                       value={state.settingsData.nutrition.numberOfMeals}
-                      onChange={handleSettingOnChange}
+                      onChange={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       maxLength="1"
                     ></input>
                     <span className="adding-window__main__form__line__decoration">
@@ -633,8 +351,17 @@ function Settings(props) {
                     {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
                   </div>
 
-                  {Object.values(state.settingsData.nutrition.namesOfMeals).map(
-                    (meal, index) => {
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      flexWrap: 'wrap',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    {Object.values(
+                      state.settingsData.nutrition.namesOfMeals
+                    ).map((meal, index) => {
                       if (state.settingsData.nutrition.numberOfMeals > index) {
                         return (
                           <div
@@ -644,7 +371,7 @@ function Settings(props) {
                             <label
                               className="adding-window__main__form__line__label"
                               htmlFor="editMealName"
-                            >{`Set meal nr ${index + 1} name: `}</label>
+                            >{`Meal no. ${index + 1} name: `}</label>
                             <input
                               className="adding-window__main__form__line__input"
                               data-key={index}
@@ -653,7 +380,9 @@ function Settings(props) {
                               value={
                                 state.settingsData.nutrition.namesOfMeals[index]
                               }
-                              onChange={handleSettingOnChange}
+                              onChange={(e) => {
+                                handleSettingOnChange(e, props);
+                              }}
                               required
                             ></input>
                             {/*<p className="adding-window__main__form__line__warning">{ props.warning[1] === 'weight' ? props.warning[0] : null }</p>*/}
@@ -662,8 +391,8 @@ function Settings(props) {
                       } else {
                         return null;
                       }
-                    }
-                  )}
+                    })}
+                  </div>
                 </section>
 
                 <section className="adding-window__main__form adding-window__main__form--options">
@@ -723,7 +452,10 @@ function Settings(props) {
                 <section
                   className="meal__buttons-section meal__buttons-section--settings"
                   style={
-                    state.isCategoryOpened
+                    (state.isCategoryOpenedNutrition &
+                      (props.category === 'Nutrition')) |
+                    (state.isCategoryOpenedTraining &
+                      (props.category === 'Training'))
                       ? { display: 'flex' }
                       : { display: 'none' }
                   }
@@ -735,7 +467,9 @@ function Settings(props) {
                           ? 'meal__buttons-section__remove-button'
                           : 'meal__buttons-section__remove-button meal__buttons-section__remove-button--disabled'
                       }
-                      onClick={handleSettingsCanceled}
+                      onClick={(e) => {
+                        handleSettingOnChange(e, props);
+                      }}
                       type="button"
                       disabled={state.isSettingsChanged ? false : true}
                     >
@@ -790,7 +524,9 @@ function Settings(props) {
 
               <form
                 className="center-section__main__settings__form"
-                onSubmit={handleSettingsSaved}
+                onSubmit={(e) => {
+                  handleSettingsSaved(e, optionsStates, props, state);
+                }}
               >
                 <section className="adding-window__main__form adding-window__main__form--exercises">
                   <h3 className="adding-window__main__form__title">
@@ -888,7 +624,10 @@ function Settings(props) {
                 <section
                   className="meal__buttons-section meal__buttons-section--settings"
                   style={
-                    state.isCategoryOpened
+                    (state.isCategoryOpenedNutrition &
+                      (props.category === 'Nutrition')) |
+                    (state.isCategoryOpenedTraining &
+                      (props.category === 'Training'))
                       ? { display: 'flex' }
                       : { display: 'none' }
                   }
@@ -900,7 +639,9 @@ function Settings(props) {
                           ? 'meal__buttons-section__remove-button'
                           : 'meal__buttons-section__remove-button meal__buttons-section__remove-button--disabled'
                       }
-                      onClick={handleSettingsCanceled}
+                      onClick={(e) => {
+                        handleSettingsCanceled(e, props, optionsStates);
+                      }}
                       type="button"
                       disabled={state.isSettingsChanged ? false : true}
                     >
@@ -928,6 +669,22 @@ function Settings(props) {
 
 const mapStateToProps = (state) => ({
   home: state.home,
+  settings: state.settings,
 });
 
-export default connect(mapStateToProps)(Settings);
+export default connect(mapStateToProps, {
+  handleOpening,
+  resetOptionsStates,
+  saveSettingsToDatabase,
+  restoreSettingFromDatabase,
+  confirmClearAllProducts,
+  cancelClearAllProducts,
+  confirmClearAllSeries,
+  cancelClearAllSeries,
+  handleSettingsSaved,
+  handleSettingsCanceled,
+  handleExerciseChoosing,
+  handleSettingOnChange,
+  updateTrainingList,
+  setSettingsChangedState,
+})(Settings);

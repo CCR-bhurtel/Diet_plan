@@ -17,8 +17,12 @@ const Signup = ({ setAlert, register, isAuthenticated }) => {
     email: '',
     password: '',
     passwordConfirm: '',
+    age: '',
+    height: '',
+    weight: '',
   });
-  const { name, email, password, passwordConfirm } = formData;
+  const { name, email, password, passwordConfirm, age, height, weight } =
+    formData;
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -30,7 +34,7 @@ const Signup = ({ setAlert, register, isAuthenticated }) => {
     } else {
       setShowGif(true);
 
-      register(name, email, password, passwordConfirm, setShowGif);
+      register(name, email, password, passwordConfirm,age, height, weight, setShowGif);
     }
   };
 
@@ -82,6 +86,39 @@ const Signup = ({ setAlert, register, isAuthenticated }) => {
               onChange={(e) => onChange(e)}
               required
             />
+          </div>
+          <div className="hwdatas">
+            <div className="input-group">
+              <input
+                type="number"
+                placeholder="Your age"
+                name="age"
+                value={age}
+                onChange={(e) => onChange(e)}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <input
+                type="number"
+                placeholder="Your height (in feet)"
+                name="height"
+                value={height}
+                onChange={(e) => onChange(e)}
+                required
+              />
+            </div>
+            <div className="input-group">
+              <input
+                type="number"
+                placeholder="Your weight (in kgs)"
+                name="weight"
+                minLength="6"
+                value={weight}
+                onChange={(e) => onChange(e)}
+                required
+              />
+            </div>
           </div>
 
           <button type="submit" className="btn btn-primary">

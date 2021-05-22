@@ -7,6 +7,13 @@ const ACTIONS = {
   CHANGE_DATE: 'change-date',
   CHANGE_PAGE_TITLE: 'change-page-title',
   LOAD_SETTINGS: 'load-settings',
+  CLEAR_ALL_PRODUCTS: 'clear-all-products',
+};
+
+export const clearAllProducts = () => (dispatch) => {
+  dispatch({
+    type: ACTIONS.CLEAR_ALL_PRODUCTS,
+  });
 };
 
 export const updateMealSummary = (object, mealId, state) => (dispatch) => {

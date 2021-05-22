@@ -36,7 +36,7 @@ const sendErrorDev = (err, res, req) => {
     });
   }
   // Rendered WebSite
-  if (err.isOperational) {
+  else if (err.isOperational) {
     return res.status(err.statusCode).render('error', {
       title: 'Something went wrong',
       msg: err.message,

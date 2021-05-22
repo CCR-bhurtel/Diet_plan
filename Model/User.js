@@ -32,6 +32,15 @@ const userSchema = new mongoose.Schema({
     },
     select: false,
   },
+  height: {
+    type: Number,
+  },
+  weight: {
+    type: Number,
+  },
+  age: {
+    type: Number,
+  },
   avatar: {
     type: String,
   },

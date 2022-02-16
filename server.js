@@ -1,17 +1,17 @@
-const dotenv = require('dotenv');
-const mongoose = require('mongoose');
+const dotenv = require("dotenv");
+const mongoose = require("mongoose");
 
-const app = require('./app');
+const app = require("./app");
 
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: "./config.env" });
 
 const db = process.env.DATABASE;
-process.on('uncaughtException', (err) => {
-  console.log('Uncaught exception: shutting down the app');
+process.on("uncaughtException", (err) => {
+  console.log("Uncaught exception: shutting down the app");
   console.log(err.name, err.message);
   process.exit(1);
 });
-
+console.log("helloworld");
 const connectDB = async () => {
   try {
     await mongoose.connect(db, {
@@ -21,7 +21,7 @@ const connectDB = async () => {
       autoIndex: true,
       useFindAndModify: false,
     });
-    console.log('Connected to the database');
+    console.log("Connected to the database");
   } catch (err) {
     console.error(err.message);
 
@@ -32,9 +32,9 @@ const connectDB = async () => {
 
 connectDB();
 
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.log(err.name, err.message);
-  console.log('UNHANDLED REJECTION: Shutting down the app');
+  console.log("UNHANDLED REJECTION: Shutting down the app");
   server.close(() => {
     process.exit(1);
   });

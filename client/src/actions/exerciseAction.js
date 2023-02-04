@@ -193,7 +193,6 @@ export const handleSerieAdding = (e, state, props) => (dispatch) => {
 };
 
 export const handleSerieRemoving = (checkedIdsList, state) => (dispatch) => {
-  console.log(checkedIdsList);
   let updatedSeriesList = state.seriesList;
 
   let serieCount = 1;

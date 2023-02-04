@@ -633,7 +633,6 @@ function Exercise(props) {
       updatedSeriesList.forEach((serie) => {
         serie.serieCount = serieCount;
         serieCount++;
-        console.log(serieCount);
       });
 
       axios.post('/api/item', {

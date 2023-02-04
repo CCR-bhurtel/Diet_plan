@@ -14,7 +14,6 @@ export const handleResetingForm =
   };
 
 export const initializeForm = (props) => (dispatch) => {
-  console.log('Initializing form');
   dispatch({ type: ACTIONS.RESET_FORM, payload: props });
 };
 

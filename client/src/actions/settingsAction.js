@@ -38,12 +38,10 @@ export const saveSettingsToDatabase = (state) => async (dispatch) => {
   const response = await axios.put('/api/setting', {
     setting: JSON.stringify(state.settingsData),
   });
-  console.log(response);
 };
 
 export const restoreSettingFromDatabase = () => async (dispatch) => {
   const response = await axios.get('/api/setting');
-  console.log(response.data);
 
   const newSettings = JSON.parse(response.data.setting.setting);
   dispatch({ type: ACTIONS.LOAD_SETTINGS, payload: newSettings });

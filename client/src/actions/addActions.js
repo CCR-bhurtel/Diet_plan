@@ -45,7 +45,6 @@ export const handleSelected = (e, state) => (dispatch) => {
 };
 
 export const updateProductSendForEdit = (selectedProduct) => (dispatch) => {
-  console.log(selectedProduct);
   dispatch({
     type: ACTIONS.SET_PRODUCT_SEND_FOR_EDIT,
     payload: selectedProduct,

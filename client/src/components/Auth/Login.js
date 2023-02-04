@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import { login } from '../../actions/authAction';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -22,7 +22,7 @@ const Login = ({ login, isAuthenticated }) => {
         login(email, password, setShowGif);
     };
     // Navigate if logged in
-    if (isAuthenticated) return <Navigate to="/" />;
+    if (isAuthenticated) return <Redirect to="/" />;
     return (
         <div className="login-form">
             <div className="form">

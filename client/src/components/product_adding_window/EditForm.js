@@ -43,7 +43,6 @@ function EditForm(props) {
   }, [state.productData]);
 
   useEffect(() => {
-    console.log('initializing');
     initializeForm(props);
   }, []);
   const checkIfFormCompleted = () => {

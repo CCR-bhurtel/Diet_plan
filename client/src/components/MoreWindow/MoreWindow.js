@@ -89,7 +89,7 @@ export default function MoreWindow(props) {
         <section className="window__main__section">
           <h3 className="window__main__section__title">Proper form</h3>
           <iframe
-            className="window__main__section__iframe"
+            className=""
             allowFullScreen
             width="100%"
             height="300px"

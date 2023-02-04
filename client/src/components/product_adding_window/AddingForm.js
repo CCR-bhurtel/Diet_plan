@@ -104,7 +104,6 @@ const AddingForm = (props) => {
 
   const saveNewProductToList = async (newProduct) => {
     const response = await axios.get('/api/predefined');
-    console.log(response.data.predefined);
     const newList = JSON.parse(response.data.predefined);
     newList.push(newProduct);
     await axios.post('/api/predefined', {

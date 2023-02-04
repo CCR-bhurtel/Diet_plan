@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 
 import { connect } from 'react-redux';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, Redirect } from 'react-router-dom';
 import { setAlert } from '../../actions/alertAction';
 import { register } from '../../actions/authAction';
 
@@ -36,7 +36,7 @@ const Signup = ({ setAlert, register, isAuthenticated }) => {
         }
     };
 
-    if (isAuthenticated) return <Navigate to="/" />;
+    if (isAuthenticated) return <Redirect to="/" />;
     return (
         <div className="signup-form">
             <div className="form">
